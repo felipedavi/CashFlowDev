@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import meimaonamassa.cashflow.MainApplication
 import meimaonamassa.cashflow.R
 import meimaonamassa.cashflow.databinding.FragmentSettingsBinding
@@ -23,6 +24,7 @@ import meimaonamassa.cashflow.util.extension.fromCurrency
 import meimaonamassa.cashflow.util.extension.hideKeyboard
 import meimaonamassa.cashflow.util.extension.toCurrency
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 class SettingsFragment : Fragment() {
@@ -116,6 +118,10 @@ class SettingsFragment : Fragment() {
         binding.buttonDelete.setOnClickListener {
             showClearDataDialog()
         }
+
+        binding.buttonAbout.setOnClickListener {
+            showAboutDialog(requireContext())
+        }
     }
 
     private fun showClearDataDialog() {
@@ -137,5 +143,34 @@ class SettingsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun showAboutDialog(context: Context) {
+        val nameApp = context.applicationInfo.loadLabel(context.packageManager).toString()
+
+        val appVersion = try {
+            val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            packageInfo.versionName
+        } catch (e: Exception) {
+            e.printStackTrace()
+            "Unknown"
+        }
+
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+
+        val message = """
+            Versão: $appVersion
+            © 2022-$currentYear Krosky Technology
+            Todos os direitos reservados.
+            contato@felipedavi.com
+            """.trimIndent()
+
+        MaterialAlertDialogBuilder(context)
+            .setTitle(nameApp)
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 }
