@@ -124,6 +124,11 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun showClearDataDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle(getString(R.string.alert_reset_data))
@@ -138,11 +143,6 @@ class SettingsFragment : Fragment() {
             }
             .setNegativeButton(getString(R.string.alert_reset_data_cancel), null)
             .show()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun showAboutDialog(context: Context) {
