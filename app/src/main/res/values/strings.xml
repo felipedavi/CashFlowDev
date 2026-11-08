@@ -45,6 +45,10 @@
     <string name="edit_installment_current">Atual</string>
     <string name="text_installment_slash">" / "</string>
     <string name="edit_installment_final">Final</string>
+    <string name="text_category">Categoria (50–30–20)</string>
+    <string name="need_category_radio">50%\nNecessid.</string>
+    <string name="wants_category_radio">30%\nDesejos</string>
+    <string name="investments_category_radio">20%\nInvestim.</string>
     <string name="edit_error">Esse campo não pode ficar vazio</string>
     <string name="group_radio_error">Você não selecionou nenhum tipo de transação</string>
     <string name="calculator_desc_image_button">Calculating the installment amount of the transaction.</string>
@@ -61,6 +65,9 @@
     <string name="button_import">Importar</string>
     <string name="button_export">Exportar</string>
     <string name="button_delete">Apagar Tudo</string>
+    <string name="button_about">Sobre</string>
+    <string name="input_layout_buget">Orçamento Mensal Total</string>
+    <string name="button_save_budget">Salvar Orçamento</string>
     <string name="alert_reset_data">Zerar dados?</string>
     <string name="alert_reset_data_details">Iso apagará todas as suas transações permanentemente. Deseja continuar?</string>
     <string name="alert_reset_data_positive">Sim, apagar</string>
@@ -69,10 +76,4 @@
     <string name="alert_export_data_success">Backup exportado com sucesso</string>
     <string name="alert_import_data_success">Dados importados com sucesso!</string>
     <string name="error_import_failed">Falha na importação: O arquivo é inválido ou está vazio.</string>
-    <string name="input_layout_buget">Orçamento Mensal Total</string>
-    <string name="button_save_budget">Salvar Orçamento</string>
-    <string name="text_category">Categoria (50–30–20)</string>
-    <string name="need_category_radio">50%\nNecessid.</string>
-    <string name="wants_category_radio">30%\nDesejos</string>
-    <string name="investments_category_radio">20%\nInvestim.</string>
 </resources>
