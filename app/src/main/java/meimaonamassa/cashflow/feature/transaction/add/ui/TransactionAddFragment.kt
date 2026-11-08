@@ -211,6 +211,8 @@ class TransactionAddFragment : Fragment() {
                 if (isIncome) getString(R.string.text_payer) else getString(R.string.text_payee)
             if (isIncome)
                 binding.groupCategory.clearCheck()
+            binding.textDate.text =
+                if (isIncome) getString(R.string.text_date) else getString(R.string.text_due_date)
             binding.groupCategory.isVisible = isExpense
             binding.textCategory.isVisible = isExpense
         }
