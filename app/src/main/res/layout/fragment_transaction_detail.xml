@@ -242,6 +242,38 @@
             android:textSize="11sp" />
     </RadioGroup>
 
+    <TextView
+        android:id="@+id/text_bank_account"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Conta / Banco"
+        android:textColor="#546E7A"
+        app:layout_constraintTop_toBottomOf="@id/group_category"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_bank_account"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_bank_account"
+        app:layout_constraintWidth_max="488dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/actv_bank_account"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:completionThreshold="1"
+            android:inputType="textCapWords"
+            android:minHeight="48dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <Button
         android:id="@+id/button_update"
         android:layout_width="wrap_content"
@@ -250,6 +282,6 @@
         android:text="@string/button_update"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/group_category" />
+        app:layout_constraintTop_toBottomOf="@id/til_bank_account" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
