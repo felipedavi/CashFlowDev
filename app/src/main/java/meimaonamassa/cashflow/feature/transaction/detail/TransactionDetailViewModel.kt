@@ -17,6 +17,8 @@ class TransactionDetailViewModel(private val repository: TransactionRepository) 
 
     val transaction = _transaction
 
+    val distinctBanks: LiveData<List<String>> = repository.getDistinctBanks()
+
     fun start(id: Int) {
         _id.value = id
     }
