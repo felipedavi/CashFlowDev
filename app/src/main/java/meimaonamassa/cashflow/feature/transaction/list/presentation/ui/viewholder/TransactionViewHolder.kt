@@ -45,6 +45,8 @@ class TransactionViewHolder(
             itemBinding.itemView.setBackgroundColor("#FF0000".toColorInt())
         }
 
+        itemBinding.textBankAccount.text = transaction.bankAccount
+
         itemView.setOnClickListener {
             listener.invoke(transaction)
         }
