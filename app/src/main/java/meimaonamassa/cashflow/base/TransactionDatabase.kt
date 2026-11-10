@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import meimaonamassa.cashflow.data.entity.TransactionEntity
 import meimaonamassa.cashflow.data.local.TransactionDAO
 
-@Database(entities = [TransactionEntity::class], version = 4)
+@Database(entities = [TransactionEntity::class], version = 5, exportSchema = false)
 @TypeConverters(DateConverters::class)
 abstract class TransactionDatabase : RoomDatabase() {
     abstract fun transactionDAO() : TransactionDAO
