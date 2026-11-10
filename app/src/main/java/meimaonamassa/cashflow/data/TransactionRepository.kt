@@ -25,6 +25,10 @@ class TransactionRepository(private val dao: TransactionDAO) {
 
     fun getPreviousBalance(monthPrefix: String) = dao.getPreviousBalance(monthPrefix)
 
+    fun getDistinctBanks(): LiveData<List<String>> {
+        return dao.getDistinctBanks()
+    }
+
     fun hasTransactionsBefore(date: String) = dao.hasTransactionsBefore(date)
     fun hasTransactionsAfter(date: String) = dao.hasTransactionsAfter(date)
 
