@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "fc8053d675befa74ea53deebfd287435",
+    "identityHash": "c87ceb52d02a1b6c755534716064cee8",
     "entities": [
       {
         "tableName": "transaction_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transaction_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `payerPayee` TEXT NOT NULL, `description` TEXT NOT NULL, `date` TEXT, `monetary_value` REAL NOT NULL, `transaction_type` INTEGER NOT NULL, `is_installment` INTEGER NOT NULL, `installment_current` INTEGER, `installment_total` INTEGER, `category` TEXT, `bank` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transaction_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `payerPayee` TEXT NOT NULL, `description` TEXT NOT NULL, `date` TEXT, `monetary_value` REAL NOT NULL, `transaction_type` INTEGER NOT NULL, `is_installment` INTEGER NOT NULL, `installment_current` INTEGER, `installment_total` INTEGER, `category` TEXT, `bank_account` TEXT NOT NULL DEFAULT 'Carteira')",
         "fields": [
           {
             "fieldPath": "id",
@@ -65,10 +65,11 @@
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "bank",
-            "columnName": "bank",
+            "fieldPath": "bankAccount",
+            "columnName": "bank_account",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "'Carteira'"
           }
         ],
         "primaryKey": {
@@ -81,7 +82,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fc8053d675befa74ea53deebfd287435')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c87ceb52d02a1b6c755534716064cee8')"
     ]
   }
 }
