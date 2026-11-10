@@ -1,35 +1,50 @@
-<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pt">
-    <string name="app_name">Fluxo de Caixa do MEI</string>
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:locale="pt">
+
     <!-- General -->
-    <string name="rc_content_desc">Transaction Listing</string>
-    <string name="fab_content_desc">add new transaction</string>
+    <string name="app_name">Fluxo de Caixa do MEI</string>
     <string name="hint_real_money">R$ 0,00</string>
+
+    <!-- General Content Descriptions -->
+    <string name="rc_content_desc">Lista de transações</string>
+    <string name="fab_content_desc">Adicionar nova transação</string>
+
     <!-- TransactionFragment -->
-    <string name="transaction_installment_format">%1$s - Par. %2$d/%3$d</string>
+    <string name="transaction_removal">Remoção de transação</string>
+    <string name="want_remove">Deseja remover a transação da lista?</string>
     <string name="remove">Remover</string>
     <string name="cancel">Cancelar</string>
-    <string name="want_remove">Deseja remover a transação da lista?</string>
-    <string name="transaction_removal">Remoção de transação</string>
+    <string name="transaction_installment_format">%1$s - Par. %2$d/%3$d</string>
+
+    <!-- Installment Transaction Dialog -->
     <string name="dialog_installment_transaction_title">Transação Parcelada</string>
     <string name="dialog_installment_transaction_message">Deseja visualizar/editar apenas esta parcela ou todas do grupo?</string>
     <string name="dialog_installment_transaction_positive_button">Todas do Grupo</string>
     <string name="dialog_installment_transaction_negative_button">Apenas Esta</string>
+
     <!-- BalanceTransactions -->
     <string name="text_label_balance">Saldo</string>
     <string name="text_label_income">Receitas</string>
     <string name="text_label_expense">Despesas</string>
-    <!-- MonthSelector-->
+
+    <!-- balance_transactions.xml -->
+    <string name="text_label_saldo">Saldo</string>
+    <string name="text_label_despesas">Despesas</string>
+    <string name="text_label_receitas">Receitas</string>
+
+    <!-- MonthSelector -->
     <string name="button_previous_month">Mês anterior</string>
     <string name="button_next_month">Próximo mês</string>
+
     <!-- TransactionAddFragment -->
     <string name="transaction_add_fragment">Adicionar Transação</string>
     <string name="button_save">Salvar</string>
+
     <!-- TransactionDetailFragment -->
     <string name="transaction_detail_fragment">Editar Transação</string>
     <string name="button_update">Atualizar</string>
-    <!-- ChartFragment -->
-    <string name="transaction_chart_fragment">Gráficos</string>
-    <string name="text_chart_title">Distribuição Mensal</string>
+
     <!-- TransactionAddFragment and TransactionDetailFragment -->
     <string name="text_payer">Pagador</string>
     <string name="text_payee">Recebedor</string>
@@ -39,41 +54,58 @@
     <string name="text_date">Data</string>
     <string name="text_due_date">Vencimento</string>
     <string name="text_transaction_type">Tipo de Transação</string>
+
+    <!-- Transaction Type -->
     <string name="radio_income">Receita</string>
     <string name="radio_expense">Despesa</string>
+
+    <!-- Installment Fields -->
     <string name="check_installment">Parcelado</string>
     <string name="edit_installment_current">Atual</string>
     <string name="text_installment_slash">" / "</string>
     <string name="edit_installment_final">Final</string>
+    <string name="calculator_desc_image_button">Calcular o valor das parcelas da transação.</string>
+
+    <!-- Transaction Category (50-30-20) -->
     <string name="text_category">Categoria (50–30–20)</string>
     <string name="need_category_radio">50%\nNecessid.</string>
     <string name="wants_category_radio">30%\nDesejos</string>
     <string name="investments_category_radio">20%\nInvestim.</string>
+
+    <!-- Transaction Validation -->
     <string name="edit_error">Esse campo não pode ficar vazio</string>
     <string name="group_radio_error">Você não selecionou nenhum tipo de transação</string>
-    <string name="calculator_desc_image_button">Calculating the installment amount of the transaction.</string>
+
+    <!-- ChartFragment -->
+    <string name="transaction_chart_fragment">Gráficos</string>
+    <string name="text_chart_title">Distribuição Mensal</string>
+
     <!-- Empty List Screen -->
-    <string name="desc_icon_empty">something wrong icon</string>
-    <string name="text_title_empty">Whoops!!!</string>
+    <string name="desc_icon_empty">Ícone de lista vazia</string>
+    <string name="text_title_empty">Ops!!!</string>
     <string name="text_subtitle_empty">Sem transações cadastradas, tente cadastrar uma.</string>
-    <!-- balance_transactions.xml -->
-    <string name="text_label_saldo">Saldo</string>
-    <string name="text_label_despesas">Despesas</string>
-    <string name="text_label_receitas">Receitas</string>
+
     <!-- SettingsFragment -->
     <string name="transaction_settings_fragment">Configurações</string>
+    <string name="input_layout_buget">Orçamento Mensal Total</string>
+    <string name="button_save_budget">Salvar Orçamento</string>
+
+    <!-- Settings Actions -->
     <string name="button_import">Importar</string>
     <string name="button_export">Exportar</string>
     <string name="button_delete">Apagar Tudo</string>
     <string name="button_about">Sobre</string>
-    <string name="input_layout_buget">Orçamento Mensal Total</string>
-    <string name="button_save_budget">Salvar Orçamento</string>
+
+    <!-- Reset Data Dialog -->
     <string name="alert_reset_data">Zerar dados?</string>
-    <string name="alert_reset_data_details">Iso apagará todas as suas transações permanentemente. Deseja continuar?</string>
+    <string name="alert_reset_data_details">Isso apagará todas as suas transações permanentemente. Deseja continuar?</string>
     <string name="alert_reset_data_positive">Sim, apagar</string>
-    <string name="alert_reset_data_success">Todos os dados foram removidos.</string>
     <string name="alert_reset_data_cancel">Cancelar</string>
+    <string name="alert_reset_data_success">Todos os dados foram removidos.</string>
+
+    <!-- Import and Export -->
     <string name="alert_export_data_success">Backup exportado com sucesso</string>
     <string name="alert_import_data_success">Dados importados com sucesso!</string>
     <string name="error_import_failed">Falha na importação: O arquivo é inválido ou está vazio.</string>
+
 </resources>
