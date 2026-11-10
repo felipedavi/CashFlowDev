@@ -17,4 +17,6 @@ data class TransactionEntity(
     @ColumnInfo(name = "installment_current") var installmentCurrent: Int? = null,
     @ColumnInfo(name = "installment_total") var installmentTotal: Int? = null,
     @ColumnInfo(name = "category") var category: String? = null,
+    @ColumnInfo(name = "bank_account", defaultValue = "Carteira")
+    val bankAccount: String = "Carteira"
 )
