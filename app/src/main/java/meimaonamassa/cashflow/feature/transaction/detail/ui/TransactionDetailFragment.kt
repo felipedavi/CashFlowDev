@@ -113,11 +113,14 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
             )
             binding.editMoney.setText(selectedTransaction.monetaryValue.toCurrency())
 
-            if (selectedTransaction.transactionType) {
+            val isIncome = selectedTransaction.transactionType
+            if (isIncome) {
                 binding.radioIncome.isChecked = true
             } else {
                 binding.radioExpense.isChecked = true
             }
+
+            updateCategoryVisibility(!isIncome)
 
             if (selectedTransaction.isInstallment) {
                 binding.checkInstallment.isChecked = true
@@ -157,28 +160,23 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
         }
 
         binding.groupRadioTransactionType.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.radio_income -> {
-                    binding.textPayerPayee.text = getString(R.string.text_payer)
-                }
-
-                R.id.radio_expense -> {
-                    binding.textPayerPayee.text = getString(R.string.text_payee)
-                }
-            }
-        }
-
-        binding.buttonUpdate.setOnClickListener(this)
-
-        binding.groupRadioTransactionType.setOnCheckedChangeListener { _, checkedId ->
             val isIncome = checkedId == R.id.radio_income
             binding.textPayerPayee.text = if (isIncome) getString(R.string.text_payer) else getString(R.string.text_payee)
+
+            updateCategoryVisibility(!isIncome)
 
             if (isIncome) {
                 binding.groupCategory.clearCheck()
             }
         }
 
+        binding.buttonUpdate.setOnClickListener(this)
+    }
+
+    private fun updateCategoryVisibility(isExpense: Boolean) {
+        val visibility = if (isExpense) View.VISIBLE else View.GONE
+        binding.textCategory.visibility = visibility
+        binding.groupCategory.visibility = visibility
     }
 
     private fun getSelectedCategory(): String? {
