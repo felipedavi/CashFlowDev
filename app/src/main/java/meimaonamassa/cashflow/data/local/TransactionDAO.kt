@@ -35,7 +35,7 @@ interface TransactionDAO {
     fun hasTransactionsAfter(date: String): Flow<Boolean>
 
     @Query("SELECT DISTINCT bank_account FROM transaction_table ORDER BY bank_account ASC")
-    fun getDistinctBanks(): Flow<List<String>>
+    fun getDistinctBanks(): LiveData<List<String>>
 
     @Update
     suspend fun updateTransaction(transaction: TransactionEntity)
