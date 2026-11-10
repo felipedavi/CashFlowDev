@@ -1,5 +1,6 @@
 package meimaonamassa.cashflow.feature.transaction.add
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +11,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TransactionAddViewModel(private val repository: TransactionRepository) : ViewModel() {
+    val distinctBanks: LiveData<List<String>> = repository.getDistinctBanks()
+
     fun insert(transaction: TransactionEntity) {
         viewModelScope.launch {
             withContext(Dispatchers.IO + NonCancellable) {
