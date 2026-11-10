@@ -53,6 +53,7 @@
     <string name="text_money">Valor</string>
     <string name="text_date">Data</string>
     <string name="text_due_date">Vencimento</string>
+    <string name="text_bank_account">Conta / Banco</string>
     <string name="text_transaction_type">Tipo de Transação</string>
 
     <!-- Transaction Type -->
