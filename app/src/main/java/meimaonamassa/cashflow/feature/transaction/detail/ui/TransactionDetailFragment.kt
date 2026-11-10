@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -49,8 +50,39 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
 
         observe()
         setListeners()
+        setupBankAutoComplete()
 
         return binding.root
+    }
+
+    private fun setupBankAutoComplete() {
+        val defaultBanks = listOf(
+            "Nubank",
+            "Inter",
+            "Mercado Pago",
+            "Carteira"
+        )
+
+        updateAutoCompleteAdapter(defaultBanks)
+
+        viewModel.distinctBanks.observe(viewLifecycleOwner) { savedBanks ->
+            val allBanks = (defaultBanks + savedBanks)
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .distinct()
+                .sorted()
+            updateAutoCompleteAdapter(allBanks)
+        }
+    }
+
+    @Suppress("UsePropertyAccessSyntax")
+    private fun updateAutoCompleteAdapter(banks: List<String>) {
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            banks
+        )
+        binding.actvBankAccount.setAdapter(adapter)
     }
 
     override fun onClick(v: View?) {
@@ -81,6 +113,7 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
             val monetaryValue = binding.editMoney.text.toString().fromCurrency()
             val transactionType = binding.radioIncome.isChecked
             val category = getSelectedCategory()
+            val bankAccount = binding.actvBankAccount.text.toString().trim().ifEmpty { "Carteira" }
 
             val updatedTransaction = selectedTransaction.copy(
                 payerPayee = payerPayee,
@@ -88,7 +121,8 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
                 date = date,
                 monetaryValue = monetaryValue,
                 transactionType = transactionType,
-                category = category
+                category = category,
+                bankAccount = bankAccount
             )
 
             viewModel.update(updatedTransaction)
@@ -112,6 +146,8 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
                     .fromFormattedDate()
             )
             binding.editMoney.setText(selectedTransaction.monetaryValue.toCurrency())
+
+            binding.actvBankAccount.setText(selectedTransaction.bankAccount, false)
 
             val isIncome = selectedTransaction.transactionType
             if (isIncome) {
