@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.view.isVisible
@@ -42,8 +43,40 @@ class TransactionAddFragment : Fragment() {
                 (requireActivity().application as MainApplication).repository
             )
         )[TransactionAddViewModel::class.java]
+
         setListeners()
+        setupBankAutoComplete()
+
         return binding.root
+    }
+
+    private fun setupBankAutoComplete() {
+        val defaultBanks = listOf(
+            "Nubank",
+            "Inter",
+            "Mercado Pago",
+            "Carteira"
+        )
+
+        updateAutoCompleteAdapter(defaultBanks)
+
+        viewModel.distinctBanks.observe(viewLifecycleOwner) { savedBanks ->
+            val allBanks = (defaultBanks + savedBanks)
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .distinct()
+                .sorted()
+            updateAutoCompleteAdapter(allBanks)
+        }
+    }
+
+    private fun updateAutoCompleteAdapter(banks: List<String>) {
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            banks
+        )
+        binding.actvBankAccount.setAdapter(adapter)
     }
 
     private fun handleSaveClick() {
@@ -55,6 +88,7 @@ class TransactionAddFragment : Fragment() {
         val monetaryValue = binding.editMoney.text.toString().fromCurrency()
         val transactionType = binding.radioIncome.isChecked
         val category = getSelectedCategory()
+        val bankAccount = binding.actvBankAccount.text.toString().trim().ifEmpty { "Carteira" }
 
         if (binding.checkInstallment.isChecked) {
             val currentStr = binding.editInstallmentCurrent.text.toString()
@@ -62,16 +96,28 @@ class TransactionAddFragment : Fragment() {
 
             if (currentStr.isNotEmpty() && finalStr.isNotEmpty()) {
                 if (currentStr == finalStr) {
-                    saveInstallments(payerPayer, description, date, monetaryValue, transactionType, category, currentStr.toInt(), currentStr.toInt(), false)
+                    saveInstallments(
+                        payerPayer, description, date, monetaryValue,
+                        transactionType, category, bankAccount,
+                        currentStr.toInt(), currentStr.toInt(), false
+                    )
                 } else {
                     AlertDialog.Builder(requireContext())
                         .setTitle("Salvar parcelas")
                         .setMessage("Deseja salvar as demais parcelas automaticamente?")
                         .setPositiveButton("Sim") { _, _ ->
-                            saveInstallments(payerPayer, description, date, monetaryValue, transactionType, category, currentStr.toInt(), finalStr.toInt(), true)
+                            saveInstallments(
+                                payerPayer, description, date, monetaryValue,
+                                transactionType, category, bankAccount,
+                                currentStr.toInt(), finalStr.toInt(), true
+                            )
                         }
                         .setNegativeButton("Não") { _, _ ->
-                            saveInstallments(payerPayer, description, date, monetaryValue, transactionType, category, currentStr.toInt(), currentStr.toInt(), false)
+                            saveInstallments(
+                                payerPayer, description, date, monetaryValue,
+                                transactionType, category, bankAccount,
+                                currentStr.toInt(), currentStr.toInt(), false
+                            )
                         }
                         .show()
                 }
@@ -87,7 +133,8 @@ class TransactionAddFragment : Fragment() {
                 monetaryValue = monetaryValue,
                 transactionType = transactionType,
                 isInstallment = false,
-                category = category
+                category = category,
+                bankAccount = bankAccount
             )
             saveAndExit(transaction)
         }
@@ -127,6 +174,7 @@ class TransactionAddFragment : Fragment() {
         totalValue: Double,
         transactionType: Boolean,
         category: String?,
+        bankAccount: String,
         current: Int,
         final: Int,
         saveAll: Boolean
@@ -146,7 +194,8 @@ class TransactionAddFragment : Fragment() {
                     isInstallment = true,
                     installmentCurrent = i,
                     installmentTotal = final,
-                    category = category
+                    category = category,
+                    bankAccount = bankAccount
                 ))
             }
             findNavController().navigateUp()
@@ -161,7 +210,8 @@ class TransactionAddFragment : Fragment() {
                 isInstallment = true,
                 installmentCurrent = current,
                 installmentTotal = final,
-                category = category
+                category = category,
+                bankAccount = bankAccount
             )
             saveAndExit(transaction)
         }
@@ -188,11 +238,6 @@ class TransactionAddFragment : Fragment() {
 
         binding.buttonCalculator.setOnClickListener {
             showCalculatorDialog()
-        }
-
-        binding.groupRadioTransactionType.setOnCheckedChangeListener { _, checkedId ->
-            binding.textPayerPayee.text = if (checkedId == R.id.radio_income)
-                getString(R.string.text_payer) else getString(R.string.text_payee)
         }
 
         binding.checkInstallment.setOnCheckedChangeListener { _, isChecked ->
