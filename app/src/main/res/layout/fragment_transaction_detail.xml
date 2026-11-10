@@ -206,12 +206,10 @@
         android:divider="?android:attr/dividerVertical"
         android:orientation="horizontal"
         android:showDividers="middle"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_category"
-        app:layout_constraintWidth_max="488dp"
-        tools:visibility="visible">
+        app:layout_constraintWidth_max="488dp" >
 
         <RadioButton
             android:id="@+id/radio_needs"
@@ -219,6 +217,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_vertical"
+            android:minHeight="48dp"
             android:text="@string/need_category_radio"
             android:textSize="11sp" />
 
@@ -228,6 +227,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_vertical"
+            android:minHeight="48dp"
             android:text="@string/wants_category_radio"
             android:textSize="11sp" />
 
@@ -237,6 +237,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_vertical"
+            android:minHeight="48dp"
             android:text="@string/investments_category_radio"
             android:textSize="11sp" />
     </RadioGroup>
