@@ -1,12 +1,12 @@
 package meimaonamassa.cashflow.data.export
 
 import meimaonamassa.cashflow.data.entity.TransactionEntity
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZoneOffset
 import org.threeten.bp.format.DateTimeFormatter
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
 
 object CSVHelper {
     private val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
@@ -68,9 +68,9 @@ object CSVHelper {
                                 if (tokens.size > 7 && tokens[7].isNotEmpty()) tokens[7].toIntOrNull() else null
 
                             val category = if (tokens.size > 8 && tokens[8].isNotEmpty()) tokens[8] else null
-                            val bank = if (tokens.size > 9 && tokens[9].isNotEmpty()) tokens[9] else null
+                            val hasBankAccount = tokens.size > 9 && tokens[9].isNotBlank()
 
-                            val entity = bank?.let {
+                            val entity = if (hasBankAccount) {
                                 TransactionEntity(
                                     id = 0,
                                     payerPayee = tokens[0],
@@ -82,10 +82,23 @@ object CSVHelper {
                                     installmentCurrent = installmentCurrent,
                                     installmentTotal = installmentTotal,
                                     category = category,
-                                    bankAccount = it
+                                    bankAccount = tokens[9].trim()
+                                )
+                            } else {
+                                TransactionEntity(
+                                    id = 0,
+                                    payerPayee = tokens[0],
+                                    description = tokens[1],
+                                    date = parsedDate,
+                                    monetaryValue = tokens[3].toDoubleOrNull() ?: 0.0,
+                                    transactionType = tokens[4].toBoolean(),
+                                    isInstallment = isInstallment,
+                                    installmentCurrent = installmentCurrent,
+                                    installmentTotal = installmentTotal,
+                                    category = category
                                 )
                             }
-                            entity?.let { transactions.add(it) }
+                            transactions.add(entity)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
