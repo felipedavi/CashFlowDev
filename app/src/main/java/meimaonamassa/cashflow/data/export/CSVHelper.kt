@@ -12,7 +12,7 @@ object CSVHelper {
     private val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     private const val DELIMITER = ";"
     private const val HEADER =
-        "payerPayee${DELIMITER}description${DELIMITER}date${DELIMITER}monetaryValue${DELIMITER}transactionType${DELIMITER}isInstallment${DELIMITER}installmentCurrent${DELIMITER}installmentTotal${DELIMITER}category"
+        "payerPayee${DELIMITER}description${DELIMITER}date${DELIMITER}monetaryValue${DELIMITER}transactionType${DELIMITER}isInstallment${DELIMITER}installmentCurrent${DELIMITER}installmentTotal${DELIMITER}category${DELIMITER}bankAccount"
 
     fun exportTransactions(transactions: List<TransactionEntity>): String {
         val rows = transactions.map { transaction ->
@@ -25,7 +25,8 @@ object CSVHelper {
                 transaction.isInstallment.toString(),
                 transaction.installmentCurrent?.toString() ?: "",
                 transaction.installmentTotal?.toString() ?: "",
-                escapeCSV(transaction.category ?: "")
+                escapeCSV(transaction.category ?: ""),
+                escapeCSV(transaction.bankAccount)
             ).joinToString(DELIMITER)
         }
 
@@ -48,40 +49,46 @@ object CSVHelper {
 
             var line: String? = r.readLine()
             while (line != null) {
-                val tokens = parseCSVLine(line)
-                if (tokens.size >= 5) {
-                    try {
-                        val dateStr = tokens[2]
-                        val parsedDate = if (dateStr.isNotEmpty()) {
-                            LocalDate.parse(dateStr, formatter).atStartOfDay(ZoneOffset.UTC)
-                                .toOffsetDateTime()
-                        } else {
-                            null
+                if (line.isNotBlank()) {
+                    val tokens = parseCSVLine(line)
+                    if (tokens.size >= 5) {
+                        try {
+                            val dateStr = tokens[2]
+                            val parsedDate = if (dateStr.isNotEmpty()) {
+                                LocalDate.parse(dateStr, formatter).atStartOfDay(ZoneOffset.UTC)
+                                    .toOffsetDateTime()
+                            } else {
+                                null
+                            }
+
+                            val isInstallment = tokens.size > 5 && tokens[5].toBoolean()
+                            val installmentCurrent =
+                                if (tokens.size > 6 && tokens[6].isNotEmpty()) tokens[6].toIntOrNull() else null
+                            val installmentTotal =
+                                if (tokens.size > 7 && tokens[7].isNotEmpty()) tokens[7].toIntOrNull() else null
+
+                            val category = if (tokens.size > 8 && tokens[8].isNotEmpty()) tokens[8] else null
+                            val bank = if (tokens.size > 9 && tokens[9].isNotEmpty()) tokens[9] else null
+
+                            val entity = bank?.let {
+                                TransactionEntity(
+                                    id = 0,
+                                    payerPayee = tokens[0],
+                                    description = tokens[1],
+                                    date = parsedDate,
+                                    monetaryValue = tokens[3].toDoubleOrNull() ?: 0.0,
+                                    transactionType = tokens[4].toBoolean(),
+                                    isInstallment = isInstallment,
+                                    installmentCurrent = installmentCurrent,
+                                    installmentTotal = installmentTotal,
+                                    category = category,
+                                    bankAccount = it
+                                )
+                            }
+                            entity?.let { transactions.add(it) }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
-
-                        val isInstallment = if (tokens.size > 5) tokens[5].toBoolean() else false
-                        val installmentCurrent =
-                            if (tokens.size > 6 && tokens[6].isNotEmpty()) tokens[6].toIntOrNull() else null
-                        val installmentTotal =
-                            if (tokens.size > 7 && tokens[7].isNotEmpty()) tokens[7].toIntOrNull() else null
-
-                        val category = if (tokens.size > 8 && tokens[8].isNotEmpty()) tokens[8] else null
-
-                        val entity = TransactionEntity(
-                            id = 0,
-                            payerPayee = tokens[0],
-                            description = tokens[1],
-                            date = parsedDate,
-                            monetaryValue = tokens[3].toDoubleOrNull() ?: 0.0,
-                            transactionType = tokens[4].toBoolean(),
-                            isInstallment = isInstallment,
-                            installmentCurrent = installmentCurrent,
-                            installmentTotal = installmentTotal,
-                            category = category
-                        )
-                        transactions.add(entity)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
                     }
                 }
                 line = r.readLine()
