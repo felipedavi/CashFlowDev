@@ -110,9 +110,9 @@
         android:layout_marginTop="16dp"
         android:text="@string/text_bank_account"
         android:textColor="#546E7A"
-        app:layout_constraintTop_toBottomOf="@id/edit_money"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/edit_money" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_bank_account"
@@ -120,6 +120,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:labelFor="@id/actv_bank_account"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_bank_account"
@@ -149,21 +150,24 @@
         android:id="@+id/group_radio_transaction_type"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_transaction_type">
 
         <RadioButton
             android:id="@+id/radio_income"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:minHeight="48dp"
             android:text="@string/radio_income" />
 
         <RadioButton
             android:id="@+id/radio_expense"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:minHeight="48dp"
             android:text="@string/radio_expense" />
     </RadioGroup>
@@ -241,7 +245,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_category"
-        app:layout_constraintWidth_max="488dp" >
+        app:layout_constraintWidth_max="488dp">
 
         <RadioButton
             android:id="@+id/radio_needs"
