@@ -174,7 +174,7 @@
         android:id="@+id/check_installment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:enabled="false"
+        android:enabled="true"
         android:text="@string/check_installment"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/group_radio_transaction_type" />
