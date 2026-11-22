@@ -4,13 +4,18 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.ZoneOffset
 
 @Entity(tableName = "transaction_table")
 data class TransactionEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "transaction_id") val id: Int = 0,
     var payerPayee: String,
     var description: String,
-    var date: OffsetDateTime?= null,
+    @ColumnInfo(name = "issue_date")
+    var issueDate: OffsetDateTime = OffsetDateTime.of(1900, 1, 1,
+        0, 0, 0, 0, ZoneOffset.UTC),
+    @ColumnInfo(name = "payment_date")
+    var paymentDate: OffsetDateTime? = null,
     @ColumnInfo(name = "monetary_value") var monetaryValue: Double,
     @ColumnInfo(name = "transaction_type") var transactionType: Boolean,
     @ColumnInfo(name = "is_installment") var isInstallment: Boolean = false,
