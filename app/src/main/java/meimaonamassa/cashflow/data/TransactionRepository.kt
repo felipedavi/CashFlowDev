@@ -35,7 +35,7 @@ class TransactionRepository(private val dao: TransactionDAO) {
     }
 
     fun importTransactionsFromCSV(inputStream: InputStream): List<TransactionEntity> {
-        return CSVHelper.importTransactions(inputStream)
+        return CSVHelper.importTransactions(inputStream).transactions
     }
 
     suspend fun deleteAll() {
