@@ -84,7 +84,7 @@ class TransactionAddFragment : Fragment() {
 
         val payerPayer = binding.editPayerPayee.text.toString().trim()
         val description = binding.editDescription.text.toString().trim()
-        val date = DateConverters.toOffsetDateTime(binding.editDate.text.toString().toFormattedDate())
+        val date = DateConverters.toOffsetDateTime(binding.editPaymentDate.text.toString().toFormattedDate())
         val monetaryValue = binding.editMoney.text.toString().fromCurrency()
         val transactionType = binding.radioIncome.isChecked
         val category = getSelectedCategory()
@@ -143,7 +143,7 @@ class TransactionAddFragment : Fragment() {
     private fun validateFields(): Boolean {
         val fieldsValid = binding.editPayerPayee.isValid() &&
                 binding.editDescription.isValid() &&
-                binding.editDate.isValid() &&
+                binding.editPaymentDate.isValid() &&
                 binding.editMoney.isValid()
 
         if (!fieldsValid) {
@@ -224,15 +224,15 @@ class TransactionAddFragment : Fragment() {
 
     private fun setListeners() {
         binding.editMoney.addTextChangedListener(CurrencyTextWatcher(binding.editMoney))
-        binding.editDate.keyListener = null
+        binding.editPaymentDate.keyListener = null
 
-        binding.editDate.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
+        binding.editPaymentDate.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
             hideKeyboard(view)
             if (hasFocus) {
-                DatePickerFragment(binding.editDate) { binding.editDate.setText(it) }.show(
+                DatePickerFragment(binding.editPaymentDate) { binding.editPaymentDate.setText(it) }.show(
                     requireActivity().supportFragmentManager, "datePicker"
                 )
-                binding.editDate.clearFocus()
+                binding.editPaymentDate.clearFocus()
             }
         }
 
@@ -256,8 +256,8 @@ class TransactionAddFragment : Fragment() {
                 if (isIncome) getString(R.string.text_payer) else getString(R.string.text_payee)
             if (isIncome)
                 binding.groupCategory.clearCheck()
-            binding.textDate.text =
-                if (isIncome) getString(R.string.text_date) else getString(R.string.text_due_date)
+            binding.textPaymentDate.text =
+                if (isIncome) getString(R.string.text_receipt_date) else getString(R.string.text_due_date)
             binding.groupCategory.isVisible = isExpense
             binding.textCategory.isVisible = isExpense
         }
