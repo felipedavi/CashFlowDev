@@ -28,6 +28,8 @@ import meimaonamassa.cashflow.util.extension.hideKeyboard
 import meimaonamassa.cashflow.util.extension.isValid
 import meimaonamassa.cashflow.util.extension.toCurrency
 import meimaonamassa.cashflow.util.extension.toFormattedDate
+import org.threeten.bp.LocalDate
+import org.threeten.bp.format.DateTimeFormatter
 
 class TransactionAddFragment : Fragment() {
     private lateinit var viewModel: TransactionAddViewModel
@@ -224,17 +226,12 @@ class TransactionAddFragment : Fragment() {
 
     private fun setListeners() {
         binding.editMoney.addTextChangedListener(CurrencyTextWatcher(binding.editMoney))
-        binding.editPaymentDate.keyListener = null
 
-        binding.editPaymentDate.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
-            hideKeyboard(view)
-            if (hasFocus) {
-                DatePickerFragment(binding.editPaymentDate) { binding.editPaymentDate.setText(it) }.show(
-                    requireActivity().supportFragmentManager, "datePicker"
-                )
-                binding.editPaymentDate.clearFocus()
-            }
-        }
+        val currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        binding.editIssueDate.setText(currentDate)
+
+        setupDateField(binding.editIssueDate)
+        setupDateField(binding.editPaymentDate)
 
         binding.buttonCalculator.setOnClickListener {
             showCalculatorDialog()
@@ -316,6 +313,19 @@ class TransactionAddFragment : Fragment() {
             R.id.radio_wants -> "Desejos"
             R.id.radio_investments -> "Investimentos"
             else -> null
+        }
+    }
+
+    private fun setupDateField(editText: EditText) {
+        editText.keyListener = null
+        editText.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
+            hideKeyboard(view)
+            if (hasFocus) {
+                DatePickerFragment(editText) { selectedDate ->
+                    editText.setText(selectedDate)
+                }.show(requireActivity().supportFragmentManager, "datePicker")
+                editText.clearFocus()
+            }
         }
     }
 
