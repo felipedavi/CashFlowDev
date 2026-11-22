@@ -142,9 +142,11 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
 
             binding.editPayerPayee.setText(selectedTransaction.payerPayee)
             binding.editDescription.setText(selectedTransaction.description)
-            binding.editDate.setText(
-                DateConverters.fromOffsetDateTime(selectedTransaction.paymentDate).toString()
-                    .fromFormattedDate()
+            binding.editIssueDate.setText(
+                DateConverters.fromOffsetDateTime(selectedTransaction.issueDate)?.fromFormattedDate()
+            )
+            binding.editPaymentDate.setText(
+                DateConverters.fromOffsetDateTime(selectedTransaction.paymentDate)?.fromFormattedDate()
             )
             binding.editMoney.setText(selectedTransaction.monetaryValue.toCurrency())
 
