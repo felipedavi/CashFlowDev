@@ -146,7 +146,7 @@ class TransactionFragment : Fragment() {
 
                     val groupedList = mutableListOf<ListItem>()
                     val groupedByDate = transactions.groupBy {
-                        it.date?.let { date ->
+                        it.paymentDate?.let { date ->
                             DateConverters.fromOffsetDateTime(date)
                         }
                     }

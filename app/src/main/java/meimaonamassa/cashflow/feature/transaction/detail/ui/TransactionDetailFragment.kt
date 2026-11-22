@@ -118,7 +118,7 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
             val updatedTransaction = selectedTransaction.copy(
                 payerPayee = payerPayee,
                 description = description,
-                date = date,
+                paymentDate = date,
                 monetaryValue = monetaryValue,
                 transactionType = transactionType,
                 category = category,
@@ -142,7 +142,7 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
             binding.editPayerPayee.setText(selectedTransaction.payerPayee)
             binding.editDescription.setText(selectedTransaction.description)
             binding.editDate.setText(
-                DateConverters.fromOffsetDateTime(selectedTransaction.date).toString()
+                DateConverters.fromOffsetDateTime(selectedTransaction.paymentDate).toString()
                     .fromFormattedDate()
             )
             binding.editMoney.setText(selectedTransaction.monetaryValue.toCurrency())
