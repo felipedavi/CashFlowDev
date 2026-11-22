@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -156,13 +157,8 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
             binding.actvBankAccount.setText(selectedTransaction.bankAccount, false)
 
             val isIncome = selectedTransaction.transactionType
-            if (isIncome) {
-                binding.radioIncome.isChecked = true
-            } else {
-                binding.radioExpense.isChecked = true
-            }
-
-            updateCategoryVisibility(!isIncome)
+            binding.radioIncome.isChecked = isIncome
+            binding.radioExpense.isChecked = !isIncome
 
             if (selectedTransaction.isInstallment) {
                 binding.checkInstallment.isChecked = true
@@ -193,23 +189,10 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
         setupDateField(binding.editPaymentDate)
 
         binding.groupRadioTransactionType.setOnCheckedChangeListener { _, checkedId ->
-            val isIncome = checkedId == R.id.radio_income
-            binding.textPayerPayee.text = if (isIncome) getString(R.string.text_payer) else getString(R.string.text_payee)
-
-            updateCategoryVisibility(!isIncome)
-
-            if (isIncome) {
-                binding.groupCategory.clearCheck()
-            }
+            updateTransactionTypeUI(checkedId == R.id.radio_income)
         }
 
         binding.buttonUpdate.setOnClickListener(this)
-    }
-
-    private fun updateCategoryVisibility(isExpense: Boolean) {
-        val visibility = if (isExpense) View.VISIBLE else View.GONE
-        binding.textCategory.visibility = visibility
-        binding.groupCategory.visibility = visibility
     }
 
     private fun getSelectedCategory(): String? {
@@ -220,6 +203,15 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
             else -> null
         }
     }
+
+    private fun updateTransactionTypeUI(isIncome: Boolean) {
+        binding.textPayerPayee.setText(if (isIncome) R.string.text_payer else R.string.text_payee)
+        binding.textPaymentDate.setText(if (isIncome) R.string.text_receipt_date else R.string.text_due_date)
+        binding.textCategory.isVisible = !isIncome
+        binding.groupCategory.isVisible = !isIncome
+        if (isIncome) binding.groupCategory.clearCheck()
+    }
+
     private fun setupDateField(editText: EditText) {
         editText.keyListener = null
         editText.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
