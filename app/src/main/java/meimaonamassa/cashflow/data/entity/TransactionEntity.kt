@@ -2,6 +2,7 @@ package meimaonamassa.cashflow.data.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
@@ -24,4 +25,8 @@ data class TransactionEntity(
     @ColumnInfo(name = "category") var category: String? = null,
     @ColumnInfo(name = "bank_account", defaultValue = "Carteira")
     val bankAccount: String = "Carteira"
-)
+) {
+    @get:Ignore
+    val date: OffsetDateTime
+        get() = paymentDate ?: issueDate
+}
