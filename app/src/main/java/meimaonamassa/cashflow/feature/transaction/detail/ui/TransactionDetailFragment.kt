@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -183,17 +184,8 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
             addTextChangedListener(CurrencyTextWatcher(this))
         }
 
-        binding.editDate.keyListener = null
-
-        binding.editDate.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
-            hideKeyboard(view)
-            if (hasFocus) {
-                DatePickerFragment(binding.editDate) { binding.editDate.setText(it) }.show(
-                    requireActivity().supportFragmentManager, "datePicker"
-                )
-                binding.editDate.clearFocus()
-            }
-        }
+        setupDateField(binding.editIssueDate)
+        setupDateField(binding.editPaymentDate)
 
         binding.groupRadioTransactionType.setOnCheckedChangeListener { _, checkedId ->
             val isIncome = checkedId == R.id.radio_income
@@ -221,6 +213,18 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
             R.id.radio_wants -> "Desejos"
             R.id.radio_investments -> "Investimentos"
             else -> null
+        }
+    }
+    private fun setupDateField(editText: EditText) {
+        editText.keyListener = null
+        editText.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
+            hideKeyboard(view)
+            if (hasFocus) {
+                DatePickerFragment(editText) { selectedDate ->
+                    editText.setText(selectedDate)
+                }.show(requireActivity().supportFragmentManager, "datePicker")
+                editText.clearFocus()
+            }
         }
     }
 }
