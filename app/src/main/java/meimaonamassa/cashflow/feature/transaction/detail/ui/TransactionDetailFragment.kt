@@ -1,6 +1,7 @@
 package meimaonamassa.cashflow.feature.transaction.detail.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,27 +29,26 @@ import meimaonamassa.cashflow.util.extension.isValid
 import meimaonamassa.cashflow.util.extension.toCurrency
 import meimaonamassa.cashflow.util.extension.toFormattedDate
 
-class TransactionDetailFragment : Fragment(), View.OnClickListener {
+class TransactionDetailFragment : Fragment() {
+
+    private lateinit var viewModel: TransactionDetailViewModel
     private var _binding: FragmentTransactionDetailBinding? = null
     private val binding get() = _binding!!
     private val args: TransactionDetailFragmentArgs by navArgs()
-    private lateinit var viewModel: TransactionDetailViewModel
     private lateinit var selectedTransaction: TransactionEntity
 
+    // region Lifecycle
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTransactionDetailBinding.inflate(inflater, container, false)
-
         viewModel = ViewModelProvider(
             this, TransactionDetailViewModelFactory(
                 (requireActivity().application as MainApplication).repository
             )
         )[TransactionDetailViewModel::class.java]
 
-        val id = args.transactionID
-
-        viewModel.start(id)
+        viewModel.start(args.transactionID)
 
         observe()
         setListeners()
@@ -57,92 +57,16 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
         return binding.root
     }
 
-    private fun setupBankAutoComplete() {
-        val defaultBanks = listOf(
-            "Nubank",
-            "Inter",
-            "Mercado Pago",
-            "Carteira"
-        )
-
-        updateAutoCompleteAdapter(defaultBanks)
-
-        viewModel.distinctBanks.observe(viewLifecycleOwner) { savedBanks ->
-            val allBanks = (defaultBanks + savedBanks)
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-                .distinct()
-                .sorted()
-            updateAutoCompleteAdapter(allBanks)
-        }
-    }
-
-    @Suppress("UsePropertyAccessSyntax")
-    private fun updateAutoCompleteAdapter(banks: List<String>) {
-        val adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_dropdown_item_1line,
-            banks
-        )
-        binding.actvBankAccount.setAdapter(adapter)
-    }
-
-    override fun onClick(v: View?) {
-        if (v?.id == R.id.button_update) {
-            val isFieldsValid = binding.editPayerPayee.isValid() &&
-                    binding.editDescription.isValid() &&
-                    binding.editIssueDate.isValid() &&
-                    binding.editPaymentDate.isValid() &&
-                    binding.editMoney.isValid()
-
-            if (!isFieldsValid) return
-
-            if (binding.groupRadioTransactionType.checkedRadioButtonId == -1) {
-                Toast.makeText(context, R.string.group_radio_error, Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            val isExpense = binding.radioExpense.isChecked
-            val noCategorySelected = binding.groupCategory.checkedRadioButtonId == -1
-
-            if (isExpense && noCategorySelected) {
-                Toast.makeText(context, "Selecione uma categoria para despesas", Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            val payerPayee = binding.editPayerPayee.text.toString().trim()
-            val description = binding.editDescription.text.toString().trim()
-            val issueDate = DateConverters.toOffsetDateTime(binding.editIssueDate.text.toString().toFormattedDate())
-            val paymentDate = DateConverters.toOffsetDateTime(binding.editPaymentDate.text.toString().toFormattedDate())
-            val monetaryValue = binding.editMoney.text.toString().fromCurrency()
-            val transactionType = binding.radioIncome.isChecked
-            val category = getSelectedCategory()
-            val bankAccount = binding.actvBankAccount.text.toString().trim().ifEmpty { "Carteira" }
-
-            val updatedTransaction = selectedTransaction.copy(
-                payerPayee = payerPayee,
-                description = description,
-                issueDate = issueDate!!,
-                paymentDate = paymentDate,
-                monetaryValue = monetaryValue,
-                transactionType = transactionType,
-                category = category,
-                bankAccount = bankAccount
-            )
-
-            viewModel.update(updatedTransaction)
-            findNavController().navigateUp()
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+    // endregion
 
+    // region Observers & UI Setup
     private fun observe() {
-        viewModel.transaction.observe(viewLifecycleOwner) {
-            selectedTransaction = it
+        viewModel.transaction.observe(viewLifecycleOwner) { transaction ->
+            selectedTransaction = transaction
 
             binding.editPayerPayee.setText(selectedTransaction.payerPayee)
             binding.editDescription.setText(selectedTransaction.description)
@@ -153,7 +77,6 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
                 DateConverters.fromOffsetDateTime(selectedTransaction.paymentDate)?.fromFormattedDate()
             )
             binding.editMoney.setText(selectedTransaction.monetaryValue.toCurrency())
-
             binding.actvBankAccount.setText(selectedTransaction.bankAccount, false)
 
             val isIncome = selectedTransaction.transactionType
@@ -181,9 +104,7 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setListeners() {
-        binding.editMoney.run {
-            addTextChangedListener(CurrencyTextWatcher(this))
-        }
+        binding.editMoney.addTextChangedListener(CurrencyTextWatcher(binding.editMoney))
 
         setupDateField(binding.editIssueDate)
         setupDateField(binding.editPaymentDate)
@@ -192,24 +113,7 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
             updateTransactionTypeUI(checkedId == R.id.radio_income)
         }
 
-        binding.buttonUpdate.setOnClickListener(this)
-    }
-
-    private fun getSelectedCategory(): String? {
-        return when (binding.groupCategory.checkedRadioButtonId) {
-            R.id.radio_needs -> "Necessidades"
-            R.id.radio_wants -> "Desejos"
-            R.id.radio_investments -> "Investimentos"
-            else -> null
-        }
-    }
-
-    private fun updateTransactionTypeUI(isIncome: Boolean) {
-        binding.textPayerPayee.setText(if (isIncome) R.string.text_payer else R.string.text_payee)
-        binding.textPaymentDate.setText(if (isIncome) R.string.text_receipt_date else R.string.text_due_date)
-        binding.textCategory.isVisible = !isIncome
-        binding.groupCategory.isVisible = !isIncome
-        if (isIncome) binding.groupCategory.clearCheck()
+        binding.buttonUpdate.setOnClickListener { handleUpdateClick() }
     }
 
     private fun setupDateField(editText: EditText) {
@@ -224,4 +128,105 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
             }
         }
     }
+
+    private fun setupBankAutoComplete() {
+        val defaultBanks = listOf("Nubank", "Inter", "Mercado Pago", "Carteira")
+        updateAutoCompleteAdapter(defaultBanks)
+
+        viewModel.distinctBanks.observe(viewLifecycleOwner) { savedBanks ->
+            val allBanks = (defaultBanks + savedBanks)
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .distinct()
+                .sorted()
+            updateAutoCompleteAdapter(allBanks)
+        }
+    }
+
+    @Suppress("UsePropertyAccessSyntax")
+    private fun updateAutoCompleteAdapter(banks: List<String>) {
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            banks
+        )
+        binding.actvBankAccount.setAdapter(adapter)
+    }
+    // endregion
+
+    // region UI Helpers
+    private fun updateTransactionTypeUI(isIncome: Boolean) {
+        binding.textPayerPayee.setText(if (isIncome) R.string.text_payer else R.string.text_payee)
+        binding.textPaymentDate.setText(if (isIncome) R.string.text_receipt_date else R.string.text_due_date)
+        binding.textCategory.isVisible = !isIncome
+        binding.groupCategory.isVisible = !isIncome
+        if (isIncome) binding.groupCategory.clearCheck()
+    }
+
+    private fun getSelectedCategory(): String? {
+        return when (binding.groupCategory.checkedRadioButtonId) {
+            R.id.radio_needs -> "Necessidades"
+            R.id.radio_wants -> "Desejos"
+            R.id.radio_investments -> "Investimentos"
+            else -> null
+        }
+    }
+    // endregion
+
+    // region Validation & Update Logic
+    private fun handleUpdateClick() {
+        if (!validateFields()) return
+
+        val payerPayee = binding.editPayerPayee.text.toString().trim()
+        val description = binding.editDescription.text.toString().trim()
+        val issueDate = DateConverters.toOffsetDateTime(binding.editIssueDate.text.toString().toFormattedDate())
+        val paymentDate = DateConverters.toOffsetDateTime(binding.editPaymentDate.text.toString().toFormattedDate())
+        val monetaryValue = binding.editMoney.text.toString().fromCurrency()
+        val transactionType = binding.radioIncome.isChecked
+        val category = getSelectedCategory()
+        val bankAccount = binding.actvBankAccount.text.toString().trim().ifEmpty { "Carteira" }
+
+        val updatedTransaction = selectedTransaction.copy(
+            payerPayee = payerPayee,
+            description = description,
+            issueDate = issueDate!!,
+            paymentDate = paymentDate,
+            monetaryValue = monetaryValue,
+            transactionType = transactionType,
+            category = category,
+            bankAccount = bankAccount
+        )
+
+        viewModel.update(updatedTransaction)
+        findNavController().navigateUp()
+    }
+
+    private fun validateFields(): Boolean {
+        val fieldsValid = binding.editPayerPayee.isValid() &&
+                binding.editDescription.isValid() &&
+                binding.editIssueDate.isValid() &&
+                binding.editPaymentDate.isValid() &&
+                binding.editMoney.isValid()
+
+        if (!fieldsValid) {
+            Log.i("Validation", "Field validation failed.")
+            return false
+        }
+
+        if (binding.groupRadioTransactionType.checkedRadioButtonId == -1) {
+            Toast.makeText(context, R.string.group_radio_error, Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        val isExpense = binding.radioExpense.isChecked
+        val noCategorySelected = binding.groupCategory.checkedRadioButtonId == -1
+
+        if (isExpense && noCategorySelected) {
+            Toast.makeText(context, "Selecione uma categoria para despesas", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        return true
+    }
+    // endregion
 }
