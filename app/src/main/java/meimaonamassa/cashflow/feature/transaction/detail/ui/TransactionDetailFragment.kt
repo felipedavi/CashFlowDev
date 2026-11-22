@@ -90,7 +90,8 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
         if (v?.id == R.id.button_update) {
             val isFieldsValid = binding.editPayerPayee.isValid() &&
                     binding.editDescription.isValid() &&
-                    binding.editDate.isValid() &&
+                    binding.editIssueDate.isValid() &&
+                    binding.editPaymentDate.isValid() &&
                     binding.editMoney.isValid()
 
             if (!isFieldsValid) return
@@ -110,7 +111,8 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
 
             val payerPayee = binding.editPayerPayee.text.toString().trim()
             val description = binding.editDescription.text.toString().trim()
-            val date = DateConverters.toOffsetDateTime(binding.editDate.text.toString().toFormattedDate())
+            val issueDate = DateConverters.toOffsetDateTime(binding.editIssueDate.text.toString().toFormattedDate())
+            val paymentDate = DateConverters.toOffsetDateTime(binding.editPaymentDate.text.toString().toFormattedDate())
             val monetaryValue = binding.editMoney.text.toString().fromCurrency()
             val transactionType = binding.radioIncome.isChecked
             val category = getSelectedCategory()
@@ -119,7 +121,8 @@ class TransactionDetailFragment : Fragment(), View.OnClickListener {
             val updatedTransaction = selectedTransaction.copy(
                 payerPayee = payerPayee,
                 description = description,
-                paymentDate = date,
+                issueDate = issueDate!!,
+                paymentDate = paymentDate,
                 monetaryValue = monetaryValue,
                 transactionType = transactionType,
                 category = category,
