@@ -13,25 +13,25 @@ interface TransactionDAO {
     @Query("SELECT * FROM transaction_table WHERE transaction_id = :id")
     fun getTransactionById(id: Int): LiveData<TransactionEntity>
 
-    @Query("SELECT * FROM transaction_table ORDER BY date DESC")
+    @Query("SELECT * FROM transaction_table ORDER BY payment_date DESC")
     suspend fun getAllTransactionsStatic(): List<TransactionEntity>
 
-    @Query("SELECT * FROM transaction_table WHERE date LIKE :monthPrefix || '%' ORDER BY date DESC")
+    @Query("SELECT * FROM transaction_table WHERE payment_date LIKE :monthPrefix || '%' ORDER BY payment_date DESC")
     fun getTransactionsByMonth(monthPrefix: String): Flow<List<TransactionEntity>>
 
-    @Query("SELECT SUM(monetary_value) FROM transaction_table WHERE transaction_type = 1 AND date LIKE :monthPrefix || '%'")
+    @Query("SELECT SUM(monetary_value) FROM transaction_table WHERE transaction_type = 1 AND payment_date LIKE :monthPrefix || '%'")
     fun getTotalIncomeByMonth(monthPrefix: String): Flow<Double?>
 
-    @Query("SELECT SUM(monetary_value) FROM transaction_table WHERE transaction_type = 0 AND date LIKE :monthPrefix || '%'")
+    @Query("SELECT SUM(monetary_value) FROM transaction_table WHERE transaction_type = 0 AND payment_date LIKE :monthPrefix || '%'")
     fun getTotalExpenseByMonth(monthPrefix: String): Flow<Double?>
 
-    @Query("SELECT SUM(CASE WHEN transaction_type = 1 THEN monetary_value ELSE -monetary_value END) FROM transaction_table WHERE date < :monthPrefix || '-01'")
+    @Query("SELECT SUM(CASE WHEN transaction_type = 1 THEN monetary_value ELSE -monetary_value END) FROM transaction_table WHERE payment_date < :monthPrefix || '-01'")
     fun getPreviousBalance(monthPrefix: String): Flow<Double?>
 
-    @Query("SELECT EXISTS(SELECT 1 FROM transaction_table WHERE date < :date)")
+    @Query("SELECT EXISTS(SELECT 1 FROM transaction_table WHERE payment_date < :date)")
     fun hasTransactionsBefore(date: String): Flow<Boolean>
 
-    @Query("SELECT EXISTS(SELECT 1 FROM transaction_table WHERE date >= :date)")
+    @Query("SELECT EXISTS(SELECT 1 FROM transaction_table WHERE payment_date >= :date)")
     fun hasTransactionsAfter(date: String): Flow<Boolean>
 
     @Query("SELECT DISTINCT bank_account FROM transaction_table ORDER BY bank_account ASC")
