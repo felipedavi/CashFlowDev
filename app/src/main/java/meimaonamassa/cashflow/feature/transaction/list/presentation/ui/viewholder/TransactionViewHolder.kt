@@ -36,7 +36,7 @@ class TransactionViewHolder(
         }
         itemBinding.textItemPayerPayeeTransaction.text = transaction.payerPayee
         itemBinding.textItemTransactionDate.text =
-            DateConverters.fromOffsetDateTime(transaction.date).toString().fromFormattedDate()
+            DateConverters.fromOffsetDateTime(transaction.paymentDate).toString().fromFormattedDate()
         itemBinding.textItemTransactionMonetaryValue.text = transaction.monetaryValue.toCurrency()
 
         if (transaction.transactionType) {
