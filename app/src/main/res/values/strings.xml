@@ -51,6 +51,7 @@
     <string name="text_payer_payee">Pagador / Recebedor</string>
     <string name="text_description">Descrição</string>
     <string name="text_money">Valor</string>
+    <string name="text_date">Data</string>
     <string name="text_issue_date">Emissão</string>
     <string name="text_payment_date">Data</string>
     <string name="text_receipt_date">Recebimento</string>
