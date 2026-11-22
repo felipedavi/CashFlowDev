@@ -205,6 +205,7 @@ class TransactionAddFragment : Fragment() {
 
         val payerPayee = binding.editPayerPayee.text.toString().trim()
         val description = binding.editDescription.text.toString().trim()
+        val issueDate = DateConverters.toOffsetDateTime(binding.editIssueDate.text.toString().toFormattedDate())
         val paymentDate = DateConverters.toOffsetDateTime(binding.editPaymentDate.text.toString().toFormattedDate())
         val monetaryValue = binding.editMoney.text.toString().fromCurrency()
         val transactionType = binding.radioIncome.isChecked
@@ -225,7 +226,7 @@ class TransactionAddFragment : Fragment() {
 
             if (current == final) {
                 saveInstallments(
-                    payerPayee, description, paymentDate, monetaryValue,
+                    payerPayee, description, issueDate, paymentDate, monetaryValue,
                     transactionType, category, bankAccount, current, final, false
                 )
             } else {
@@ -234,13 +235,13 @@ class TransactionAddFragment : Fragment() {
                     .setMessage("Deseja salvar as demais parcelas automaticamente?")
                     .setPositiveButton("Sim") { _, _ ->
                         saveInstallments(
-                            payerPayee, description, paymentDate, monetaryValue,
+                            payerPayee, description, issueDate, paymentDate, monetaryValue,
                             transactionType, category, bankAccount, current, final, true
                         )
                     }
                     .setNegativeButton("Não") { _, _ ->
                         saveInstallments(
-                            payerPayee, description, paymentDate, monetaryValue,
+                            payerPayee, description, issueDate, paymentDate, monetaryValue,
                             transactionType, category, bankAccount, current, current, false
                         )
                     }
@@ -251,6 +252,7 @@ class TransactionAddFragment : Fragment() {
                 id = 0,
                 payerPayee = payerPayee,
                 description = description,
+                issueDate = issueDate!!,
                 paymentDate = paymentDate,
                 monetaryValue = monetaryValue,
                 transactionType = transactionType,
@@ -265,6 +267,7 @@ class TransactionAddFragment : Fragment() {
     private fun validateFields(): Boolean {
         val fieldsValid = binding.editPayerPayee.isValid() &&
                 binding.editDescription.isValid() &&
+                binding.editIssueDate.isValid() &&
                 binding.editPaymentDate.isValid() &&
                 binding.editMoney.isValid()
 
@@ -292,7 +295,8 @@ class TransactionAddFragment : Fragment() {
     private fun saveInstallments(
         payerPayee: String,
         description: String,
-        date: OffsetDateTime?,
+        issueDate: OffsetDateTime?,
+        paymentDate: OffsetDateTime?,
         totalValue: Double,
         transactionType: Boolean,
         category: String?,
@@ -304,13 +308,14 @@ class TransactionAddFragment : Fragment() {
         if (saveAll) {
             for (i in current..final) {
                 val currentMonthOffset = (i - current).toLong()
-                val installmentDate = date?.plusMonths(currentMonthOffset)
+                val installmentDate = paymentDate?.plusMonths(currentMonthOffset)
 
                 viewModel.insert(
                     TransactionEntity(
                         id = 0,
                         payerPayee = payerPayee,
                         description = description,
+                        issueDate = issueDate!!,
                         paymentDate = installmentDate,
                         monetaryValue = totalValue,
                         transactionType = transactionType,
@@ -328,7 +333,8 @@ class TransactionAddFragment : Fragment() {
                 id = 0,
                 payerPayee = payerPayee,
                 description = description,
-                paymentDate = date,
+                issueDate = issueDate!!,
+                paymentDate = paymentDate,
                 monetaryValue = totalValue,
                 transactionType = transactionType,
                 isInstallment = true,
