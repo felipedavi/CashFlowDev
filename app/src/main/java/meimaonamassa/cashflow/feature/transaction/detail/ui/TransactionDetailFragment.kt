@@ -3,13 +3,18 @@ package meimaonamassa.cashflow.feature.transaction.detail.ui
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -50,11 +55,30 @@ class TransactionDetailFragment : Fragment() {
 
         viewModel.start(args.transactionID)
 
+        setupMenu()
         observe()
         setListeners()
         setupBankAutoComplete()
 
         return binding.root
+    }
+
+    private fun setupMenu() {
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.detail_menu, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.action_clone -> {
+                        cloneTransaction()
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     override fun onDestroyView() {
@@ -114,6 +138,15 @@ class TransactionDetailFragment : Fragment() {
         }
 
         binding.buttonUpdate.setOnClickListener { handleUpdateClick() }
+        binding.buttonClone.setOnClickListener { cloneTransaction() }
+    }
+
+    private fun cloneTransaction() {
+        if (::selectedTransaction.isInitialized) {
+            val action = TransactionDetailFragmentDirections
+                .navigateToTransactionAddFragmentFromDetail(cloneTransactionId = selectedTransaction.id)
+            findNavController().navigate(action)
+        }
     }
 
     private fun setupDateField(editText: EditText) {
