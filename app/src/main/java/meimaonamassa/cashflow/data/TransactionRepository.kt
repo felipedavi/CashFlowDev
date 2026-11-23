@@ -28,6 +28,8 @@ class TransactionRepository(private val dao: TransactionDAO) {
 
     fun getPreviousTransactions(monthPrefix: String) = dao.getPreviousTransactions(monthPrefix)
 
+    fun getFutureExpensesFrom(startDate: String) = dao.getFutureExpensesFrom(startDate)
+
     fun getDistinctBanks(): LiveData<List<String>> {
         return dao.getDistinctBanks()
     }
