@@ -23,26 +23,26 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/pieChart"
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayoutCharts"
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintDimensionRatio="1:1"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:tabGravity="fill"
+            app:tabMode="scrollable"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_chart_title"
-            tools:background="#F0F0F0" />
+            app:layout_constraintTop_toBottomOf="@id/text_chart_title" />
 
         <LinearLayout
             android:id="@+id/layout_budget_status"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/pieChart">
+            app:layout_constraintTop_toBottomOf="@id/tabLayoutCharts">
 
             <TextView
                 android:id="@+id/text_needs_status"
@@ -94,6 +94,17 @@
 
         </LinearLayout>
 
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/pieChart"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_budget_status"
+            tools:background="#F0F0F0" />
+
         <TextView
             android:id="@+id/text_category_chart_title"
             android:layout_width="wrap_content"
@@ -104,7 +115,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layout_budget_status" />
+            app:layout_constraintTop_toBottomOf="@id/pieChart" />
 
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/pieChartCategories"
