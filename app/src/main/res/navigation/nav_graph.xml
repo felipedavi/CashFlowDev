@@ -29,7 +29,12 @@
         android:id="@+id/transactionAddFragment"
         android:name="meimaonamassa.cashflow.feature.transaction.add.ui.TransactionAddFragment"
         android:label="@string/transaction_add_fragment"
-        tools:layout="@layout/fragment_transaction_add" />
+        tools:layout="@layout/fragment_transaction_add">
+        <argument
+            android:name="cloneTransactionId"
+            android:defaultValue="0"
+            app:argType="integer" />
+    </fragment>
     <fragment
         android:id="@+id/transactionDetailFragment"
         android:name="meimaonamassa.cashflow.feature.transaction.detail.ui.TransactionDetailFragment"
@@ -39,6 +44,10 @@
             android:name="transactionID"
             android:defaultValue="0"
             app:argType="integer" />
+        <action
+            android:id="@+id/navigateToTransactionAddFragmentFromDetail"
+            app:destination="@id/transactionAddFragment"
+            app:launchSingleTop="true" />
     </fragment>
 
     <fragment
