@@ -16,6 +16,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import meimaonamassa.cashflow.MainApplication
 import meimaonamassa.cashflow.R
 import meimaonamassa.cashflow.base.DateConverters
@@ -26,6 +27,7 @@ import meimaonamassa.cashflow.feature.transaction.add.TransactionAddViewModelFac
 import meimaonamassa.cashflow.util.CurrencyTextWatcher
 import meimaonamassa.cashflow.util.DatePickerFragment
 import meimaonamassa.cashflow.util.extension.fromCurrency
+import meimaonamassa.cashflow.util.extension.fromFormattedDate
 import meimaonamassa.cashflow.util.extension.hideKeyboard
 import meimaonamassa.cashflow.util.extension.isValid
 import meimaonamassa.cashflow.util.extension.toCurrency
@@ -39,6 +41,7 @@ class TransactionAddFragment : Fragment() {
     private lateinit var viewModel: TransactionAddViewModel
     private var _binding: FragmentTransactionAddBinding? = null
     private val binding get() = _binding!!
+    private val args: TransactionAddFragmentArgs by navArgs()
 
     // region Lifecycle
     override fun onCreateView(
@@ -68,6 +71,49 @@ class TransactionAddFragment : Fragment() {
     private fun setupViews() {
         val currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
         binding.editIssueDate.setText(currentDate)
+
+        if (args.cloneTransactionId > 0) {
+            viewModel.getTransaction(args.cloneTransactionId).observe(viewLifecycleOwner) { transaction ->
+                if (transaction != null) {
+                    populateFromTransaction(transaction)
+                }
+            }
+        }
+    }
+
+    private fun populateFromTransaction(transaction: TransactionEntity) {
+        binding.editPayerPayee.setText(transaction.payerPayee)
+        binding.editDescription.setText(transaction.description)
+
+        val issueDateStr = DateConverters.fromOffsetDateTime(transaction.issueDate)?.fromFormattedDate()
+        if (!issueDateStr.isNullOrEmpty()) {
+            binding.editIssueDate.setText(issueDateStr)
+        }
+
+        if (transaction.paymentDate != null) {
+            binding.editPaymentDate.setText(
+                DateConverters.fromOffsetDateTime(transaction.paymentDate)?.fromFormattedDate()
+            )
+        }
+
+        binding.editMoney.setText(transaction.monetaryValue.toCurrency())
+        binding.actvBankAccount.setText(transaction.bankAccount, false)
+
+        val isIncome = transaction.transactionType
+        binding.radioIncome.isChecked = isIncome
+        binding.radioExpense.isChecked = !isIncome
+
+        binding.checkInstallment.isChecked = false
+        binding.layoutInstallments.visibility = GONE
+        binding.buttonCalculator.visibility = GONE
+        binding.editInstallmentCurrent.text.clear()
+        binding.editInstallmentFinal.text.clear()
+
+        when (transaction.category) {
+            "Necessidades" -> binding.radioNeeds.isChecked = true
+            "Desejos" -> binding.radioWants.isChecked = true
+            "Investimentos" -> binding.radioInvestments.isChecked = true
+        }
     }
 
     private fun setListeners() {
