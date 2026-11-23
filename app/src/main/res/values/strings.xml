@@ -91,6 +91,11 @@
     <string name="legend_actual_spent">Gasto Real</string>
     <string name="legend_target_limit">Limite (50-30-20)</string>
     <string name="no_expenses_text">Nenhuma despesa neste mês</string>
+    <string name="tab_chart_progress">Progresso (50–30–20)</string>
+    <string name="tab_chart_balance">Balanço Mensal</string>
+    <string name="tab_chart_categories">Categorias</string>
+    <string name="tab_chart_comparison">Comparativo</string>
+    <string name="tab_chart_all">Todos</string>
 
     <!-- Empty List Screen -->
     <string name="desc_icon_empty">Ícone de lista vazia</string>
