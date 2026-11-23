@@ -23,6 +23,9 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
 
     val currentMonth = MutableStateFlow(YearMonth.now())
 
+    private val _selectedBankAccounts = MutableStateFlow<Set<String>>(emptySet())
+    val selectedBankAccounts: StateFlow<Set<String>> = _selectedBankAccounts.asStateFlow()
+
     private val monthPrefixFlow = currentMonth.map {
         it.toString()
     }
@@ -35,16 +38,24 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
         .asLiveData()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val totalIncome: LiveData<Double> = monthPrefixFlow
-        .flatMapLatest { prefix -> repository.getTotalIncomeByMonth(prefix) }
-        .map { it ?: 0.0 }
-        .asLiveData()
+    val totalIncome: LiveData<Double> = combine(
+        transactionsByMonthFlow,
+        _selectedBankAccounts
+    ) { transactions, selectedAccounts ->
+        transactions.filter { trans ->
+            trans.transactionType && (selectedAccounts.isEmpty() || trans.bankAccount in selectedAccounts)
+        }.sumOf { it.monetaryValue }
+    }.asLiveData()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val totalExpense: LiveData<Double> = monthPrefixFlow
-        .flatMapLatest { prefix -> repository.getTotalExpenseByMonth(prefix) }
-        .map { it ?: 0.0 }
-        .asLiveData()
+    val totalExpense: LiveData<Double> = combine(
+        transactionsByMonthFlow,
+        _selectedBankAccounts
+    ) { transactions, selectedAccounts ->
+        transactions.filter { trans ->
+            !trans.transactionType && (selectedAccounts.isEmpty() || trans.bankAccount in selectedAccounts)
+        }.sumOf { it.monetaryValue }
+    }.asLiveData()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val monthlyTotals: LiveData<Pair<Double, Double>> = monthPrefixFlow.flatMapLatest { prefix ->
@@ -65,11 +76,23 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
     @OptIn(ExperimentalCoroutinesApi::class)
     val balance: LiveData<Double> = monthPrefixFlow.flatMapLatest { prefix ->
         combine(
-            repository.getPreviousBalance(prefix),
-            repository.getTotalIncomeByMonth(prefix),
-            repository.getTotalExpenseByMonth(prefix)
-        ) { prevBalance, income, expense ->
-            (prevBalance ?: 0.0) + (income ?: 0.0) - (expense ?: 0.0)
+            repository.getPreviousTransactions(prefix),
+            repository.getTransactionsByMonth(prefix),
+            _selectedBankAccounts
+        ) { prevList, currentList, selectedAccounts ->
+            val prevBalance = prevList.filter { trans ->
+                selectedAccounts.isEmpty() || trans.bankAccount in selectedAccounts
+            }.sumOf { if (it.transactionType) it.monetaryValue else -it.monetaryValue }
+
+            val income = currentList.filter { trans ->
+                trans.transactionType && (selectedAccounts.isEmpty() || trans.bankAccount in selectedAccounts)
+            }.sumOf { it.monetaryValue }
+
+            val expense = currentList.filter { trans ->
+                !trans.transactionType && (selectedAccounts.isEmpty() || trans.bankAccount in selectedAccounts)
+            }.sumOf { it.monetaryValue }
+
+            prevBalance + income - expense
         }
     }.asLiveData()
 
@@ -107,11 +130,25 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
         }
     }
 
-    private val _selectedBankAccounts = MutableStateFlow<Set<String>>(emptySet())
-    val selectedBankAccounts: StateFlow<Set<String>> = _selectedBankAccounts.asStateFlow()
-
     private val _filterDefaultIssueDateOnly = MutableStateFlow(false)
     val filterDefaultIssueDateOnly: StateFlow<Boolean> = _filterDefaultIssueDateOnly.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val bankAccountBalances: StateFlow<Map<String, Double>> = monthPrefixFlow.flatMapLatest { prefix ->
+        combine(
+            repository.getPreviousTransactions(prefix),
+            repository.getTransactionsByMonth(prefix)
+        ) { prevList, currentList ->
+            val allUntilNow = prevList + currentList
+            val bankMap = mutableMapOf<String, Double>()
+            allUntilNow.forEach { trans ->
+                val bank = trans.bankAccount.trim().ifEmpty { "Carteira" }
+                val amount = if (trans.transactionType) trans.monetaryValue else -trans.monetaryValue
+                bankMap[bank] = (bankMap[bank] ?: 0.0) + amount
+            }
+            bankMap.toMap()
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     val availableBankAccounts: StateFlow<List<String>> = transactionsByMonthFlow
         .map { list ->

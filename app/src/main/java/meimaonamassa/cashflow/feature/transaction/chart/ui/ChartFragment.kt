@@ -5,11 +5,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.components.Legend
@@ -24,6 +28,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.tabs.TabLayout
+import kotlinx.coroutines.launch
 import meimaonamassa.cashflow.MainApplication
 import meimaonamassa.cashflow.R
 import meimaonamassa.cashflow.data.entity.TransactionEntity
@@ -138,6 +143,7 @@ class ChartFragment : Fragment() {
         binding.tabLayoutCharts.removeAllTabs()
         binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_progress)), true)
         binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_balance)))
+        binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_bank_accounts)))
         binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_categories)))
         binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_comparison)))
         binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_all)))
@@ -156,13 +162,17 @@ class ChartFragment : Fragment() {
     }
 
     private fun updateChartVisibility(position: Int) {
-        val showProgress = position == 0 || position == 4
-        val showBalance = position == 1 || position == 4
-        val showCategories = position == 2 || position == 4
-        val showComparison = position == 3 || position == 4
+        val showProgress = position == 0 || position == 5
+        val showBalance = position == 1 || position == 5
+        val showBankAccounts = position == 2 || position == 5
+        val showCategories = position == 3 || position == 5
+        val showComparison = position == 4 || position == 5
 
         binding.layoutBudgetStatus.visibility = if (showProgress) View.VISIBLE else View.GONE
         binding.pieChart.visibility = if (showBalance) View.VISIBLE else View.GONE
+
+        binding.textBankAccountsChartTitle.visibility = if (showBankAccounts) View.VISIBLE else View.GONE
+        binding.layoutBankAccountsStatus.visibility = if (showBankAccounts) View.VISIBLE else View.GONE
 
         binding.textCategoryChartTitle.visibility = if (showCategories) View.VISIBLE else View.GONE
         binding.pieChartCategories.visibility = if (showCategories) View.VISIBLE else View.GONE
@@ -182,6 +192,89 @@ class ChartFragment : Fragment() {
         viewModel.allTransactions.observe(viewLifecycleOwner) { transactions ->
             val budget = prefManager.getMonthlyBudget()
             updateBudgetStatus(transactions, budget)
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.bankAccountBalances.collect { bankMap ->
+                    updateBankAccountsUI(bankMap)
+                }
+            }
+        }
+    }
+
+    private fun updateBankAccountsUI(bankMap: Map<String, Double>) {
+        val container = binding.layoutBankAccountsStatus
+        container.removeAllViews()
+
+        if (bankMap.isEmpty()) {
+            val emptyText = TextView(requireContext()).apply {
+                text = getString(R.string.no_expenses_text)
+                setTextColor(Color.GRAY)
+                textSize = 14f
+                setPadding(0, 16, 0, 16)
+            }
+            container.addView(emptyText)
+            return
+        }
+
+        val maxPositiveBalance = bankMap.values.filter { it > 0 }.sum().let { if (it > 0) it else 1.0 }
+
+        bankMap.forEach { (bankName, balance) ->
+            val layout = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(0, 8, 0, 16)
+            }
+
+            val headerLayout = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            val nameTextView = TextView(requireContext()).apply {
+                text = bankName
+                setTextColor("#455A64".toColorInt())
+                textSize = 14f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(
+                    0,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
+            }
+
+            val balanceTextView = TextView(requireContext()).apply {
+                text = balance.toCurrency()
+                setTextColor(if (balance >= 0) "#4CAF50".toColorInt() else Color.RED)
+                textSize = 14f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+            }
+
+            headerLayout.addView(nameTextView)
+            headerLayout.addView(balanceTextView)
+
+            val progressBar = ProgressBar(requireContext(), null, android.R.attr.progressBarStyleHorizontal).apply {
+                max = 100
+                val progressPercent = if (balance > 0) ((balance / maxPositiveBalance) * 100).toInt() else 0
+                progress = progressPercent
+                progressTintList = android.content.res.ColorStateList.valueOf(
+                    if (balance >= 0) "#4CAF50".toColorInt() else Color.RED
+                )
+                progressDrawable = requireContext().getDrawable(R.drawable.rounded_border)
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    topMargin = 8
+                }
+            }
+
+            layout.addView(headerLayout)
+            layout.addView(progressBar)
+            container.addView(layout)
         }
     }
 
