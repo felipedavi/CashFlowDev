@@ -138,7 +138,6 @@ class TransactionDetailFragment : Fragment() {
         }
 
         binding.buttonUpdate.setOnClickListener { handleUpdateClick() }
-        binding.buttonClone.setOnClickListener { cloneTransaction() }
     }
 
     private fun cloneTransaction() {
