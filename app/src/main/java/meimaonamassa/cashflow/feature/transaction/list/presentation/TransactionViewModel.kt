@@ -6,9 +6,14 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import meimaonamassa.cashflow.data.TransactionRepository
 import meimaonamassa.cashflow.data.entity.TransactionEntity
@@ -89,5 +94,40 @@ class TransactionViewModel(private val repository: TransactionRepository): ViewM
         viewModelScope.launch {
             repository.delete(transaction)
         }
+    }
+
+    private val _selectedBankAccounts = MutableStateFlow<Set<String>>(emptySet())
+    val selectedBankAccounts: StateFlow<Set<String>> = _selectedBankAccounts.asStateFlow()
+
+    private val _allTransactions = MutableStateFlow<List<TransactionEntity>>(emptyList())
+
+    val availableBankAccounts: StateFlow<List<String>> = _allTransactions
+        .map { list ->
+            list.map { it.bankAccount }
+                .filter { it.isNotBlank() }
+                .distinct()
+                .sorted()
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val filteredTransactions: StateFlow<List<TransactionEntity>> = combine(
+        _allTransactions,
+        _selectedBankAccounts
+    ) { transactions, selectedAccounts ->
+        if (selectedAccounts.isEmpty()) {
+            transactions
+        } else {
+            transactions.filter { it.bankAccount in selectedAccounts }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun toggleBankAccountFilter(account: String, isChecked: Boolean) {
+        _selectedBankAccounts.update { current ->
+            if (isChecked) current + account else current - account
+        }
+    }
+
+    fun clearAllFilters() {
+        _selectedBankAccounts.value = emptySet()
     }
 }
