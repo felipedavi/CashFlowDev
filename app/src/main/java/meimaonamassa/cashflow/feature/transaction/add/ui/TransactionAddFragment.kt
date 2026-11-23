@@ -166,7 +166,18 @@ class TransactionAddFragment : Fragment() {
     }
 
     private fun setupBankAutoComplete() {
-        val defaultBanks = listOf("Nubank", "Inter", "Mercado Pago", "Carteira")
+        val defaultBanks = listOf("Carteira", "Flash", "Nubank", "Mercado Pago", "Inter")
+        val bankComparator = Comparator<String> { b1, b2 ->
+            val idx1 = defaultBanks.indexOfFirst { it.equals(b1.trim(), ignoreCase = true) }
+            val idx2 = defaultBanks.indexOfFirst { it.equals(b2.trim(), ignoreCase = true) }
+            when {
+                idx1 != -1 && idx2 != -1 -> idx1.compareTo(idx2)
+                idx1 != -1 -> -1
+                idx2 != -1 -> 1
+                else -> b1.compareTo(b2, ignoreCase = true)
+            }
+        }
+
         updateAutoCompleteAdapter(defaultBanks)
 
         viewModel.distinctBanks.observe(viewLifecycleOwner) { savedBanks ->
@@ -174,7 +185,7 @@ class TransactionAddFragment : Fragment() {
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
                 .distinct()
-                .sorted()
+                .sortedWith(bankComparator)
             updateAutoCompleteAdapter(allBanks)
         }
     }
