@@ -192,7 +192,17 @@ class TransactionFragment : Fragment() {
 
     private fun setupFilterMenu() {
         val filterView = binding.root.findViewById<View>(R.id.filter_menu_container) ?: return
-        filterView.findViewById<TextView>(R.id.tvFilterBankAccountTitle)?.text = "Conta Bancária"
+        filterView.findViewById<TextView>(R.id.tvFilterBankAccountTitle)?.text =
+            getString(R.string.text_bank_account)
+        filterView.findViewById<TextView>(R.id.tvFilterIssueDateTitle)?.text =
+            getString(R.string.filter_issue_date_title)
+
+        val chipDefaultIssueDate =
+            filterView.findViewById<Chip>(R.id.chipFilterDefaultIssueDate)
+        chipDefaultIssueDate?.isChecked = viewModel.filterDefaultIssueDateOnly.value
+        chipDefaultIssueDate?.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.toggleDefaultIssueDateFilter(isChecked)
+        }
 
         filterView.findViewById<ImageButton>(R.id.btnCloseFilter)?.setOnClickListener {
             filterView.visibility = View.GONE
@@ -201,6 +211,7 @@ class TransactionFragment : Fragment() {
         filterView.findViewById<ImageButton>(R.id.btnClearFilters)?.setOnClickListener {
             viewModel.clearAllFilters()
             filterView.findViewById<ChipGroup>(R.id.chipGroupBankAccount)?.clearCheck()
+            chipDefaultIssueDate?.isChecked = false
         }
     }
 
@@ -235,7 +246,7 @@ class TransactionFragment : Fragment() {
                 safeBinding.recyclerTransactions.visibility = View.GONE
                 safeBinding.emptyContainer.root.visibility = View.VISIBLE
                 safeBinding.balanceContainer.root.visibility =
-                    if (viewModel.selectedBankAccounts.value.isNotEmpty()) View.VISIBLE else View.GONE
+                    if (viewModel.selectedBankAccounts.value.isNotEmpty() || viewModel.filterDefaultIssueDateOnly.value) View.VISIBLE else View.GONE
             } else {
                 safeBinding.recyclerTransactions.visibility = View.VISIBLE
                 safeBinding.emptyContainer.root.visibility = View.GONE
