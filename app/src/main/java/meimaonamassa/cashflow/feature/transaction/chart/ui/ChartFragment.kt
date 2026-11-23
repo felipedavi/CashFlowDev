@@ -33,6 +33,7 @@ import meimaonamassa.cashflow.MainApplication
 import meimaonamassa.cashflow.R
 import meimaonamassa.cashflow.data.entity.TransactionEntity
 import meimaonamassa.cashflow.databinding.FragmentChartBinding
+import meimaonamassa.cashflow.feature.transaction.list.presentation.MonthlyProjection
 import meimaonamassa.cashflow.feature.transaction.list.presentation.TransactionViewModel
 import meimaonamassa.cashflow.feature.transaction.list.presentation.TransactionViewModelFactory
 import meimaonamassa.cashflow.util.PreferenceManager
@@ -66,6 +67,7 @@ class ChartFragment : Fragment() {
         binding.pieChart.clear()
         binding.pieChartCategories.clear()
         binding.barChartCategoryComparison.clear()
+        binding.barChartProjection.clear()
         try {
             val selectedMonth = YearMonth.parse(args.selectedMonth)
             if (viewModel.currentMonth.value != selectedMonth) {
@@ -137,6 +139,23 @@ class ChartFragment : Fragment() {
             }
             axisRight.isEnabled = false
         }
+
+        binding.barChartProjection.apply {
+            description.isEnabled = false
+            setDrawGridBackground(false)
+            legend.isEnabled = false
+            setNoDataText(getString(R.string.no_projection_expenses))
+
+            axisLeft.apply {
+                axisMinimum = 0f
+                valueFormatter = object : ValueFormatter() {
+                    override fun getFormattedValue(value: Float): String {
+                        return value.toDouble().toCurrency()
+                    }
+                }
+            }
+            axisRight.isEnabled = false
+        }
     }
 
     private fun setupTabs() {
@@ -144,6 +163,7 @@ class ChartFragment : Fragment() {
         binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_progress)), true)
         binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_balance)))
         binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_bank_accounts)))
+        binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_projection)))
         binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_categories)))
         binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_comparison)))
         binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_all)))
@@ -162,17 +182,23 @@ class ChartFragment : Fragment() {
     }
 
     private fun updateChartVisibility(position: Int) {
-        val showProgress = position == 0 || position == 5
-        val showBalance = position == 1 || position == 5
-        val showBankAccounts = position == 2 || position == 5
-        val showCategories = position == 3 || position == 5
-        val showComparison = position == 4 || position == 5
+        val showProgress = position == 0 || position == 6
+        val showBalance = position == 1 || position == 6
+        val showBankAccounts = position == 2 || position == 6
+        val showProjection = position == 3 || position == 6
+        val showCategories = position == 4 || position == 6
+        val showComparison = position == 5 || position == 6
 
         binding.layoutBudgetStatus.visibility = if (showProgress) View.VISIBLE else View.GONE
         binding.pieChart.visibility = if (showBalance) View.VISIBLE else View.GONE
 
         binding.textBankAccountsChartTitle.visibility = if (showBankAccounts) View.VISIBLE else View.GONE
         binding.layoutBankAccountsStatus.visibility = if (showBankAccounts) View.VISIBLE else View.GONE
+
+        binding.cardProjectionSummary.visibility = if (showProjection) View.VISIBLE else View.GONE
+        binding.textProjectionChartTitle.visibility = if (showProjection) View.VISIBLE else View.GONE
+        binding.barChartProjection.visibility = if (showProjection) View.VISIBLE else View.GONE
+        binding.layoutProjectionDetails.visibility = if (showProjection) View.VISIBLE else View.GONE
 
         binding.textCategoryChartTitle.visibility = if (showCategories) View.VISIBLE else View.GONE
         binding.pieChartCategories.visibility = if (showCategories) View.VISIBLE else View.GONE
@@ -196,10 +222,148 @@ class ChartFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.bankAccountBalances.collect { bankMap ->
-                    updateBankAccountsUI(bankMap)
+                launch {
+                    viewModel.bankAccountBalances.collect { bankMap ->
+                        updateBankAccountsUI(bankMap)
+                    }
+                }
+                launch {
+                    viewModel.futureProjectionData.collect { projectionData ->
+                        if (projectionData.nextMonthLabel.isNotEmpty()) {
+                            binding.textProjectionSummary.text = getString(
+                                R.string.projection_summary_format,
+                                projectionData.nextMonthLabel,
+                                projectionData.nextMonthAmount.toCurrency()
+                            )
+                        } else {
+                            binding.textProjectionSummary.text = getString(R.string.no_projection_expenses)
+                        }
+                        updateProjectionBarChart(projectionData.monthlyProjections)
+                        updateProjectionDetailsUI(projectionData.monthlyProjections)
+                    }
                 }
             }
+        }
+    }
+
+    private fun updateProjectionBarChart(projections: List<MonthlyProjection>) {
+        if (projections.isEmpty() || projections.all { it.totalAmount <= 0 }) {
+            binding.barChartProjection.clear()
+            binding.barChartProjection.invalidate()
+            return
+        }
+
+        val entries = projections.mapIndexed { index, proj ->
+            BarEntry(index.toFloat(), proj.totalAmount.toFloat())
+        }
+
+        val labels = projections.map { it.monthLabel }.toTypedArray()
+
+        val currencyFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return if (value > 0) value.toDouble().toCurrency() else ""
+            }
+        }
+
+        val dataSet = BarDataSet(entries, "Compromissos").apply {
+            color = "#2E7D32".toColorInt()
+            valueTextSize = 10f
+            valueTextColor = "#2E7D32".toColorInt()
+            valueFormatter = currencyFormatter
+        }
+
+        val barData = BarData(dataSet)
+        barData.barWidth = 0.45f
+
+        binding.barChartProjection.apply {
+            data = barData
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                setDrawGridLines(false)
+                valueFormatter = IndexAxisValueFormatter(labels)
+                granularity = 1f
+                isGranularityEnabled = true
+                axisMinimum = -0.5f
+                axisMaximum = (projections.size - 0.5).toFloat()
+            }
+            animateY(1000, Easing.EaseInOutQuad)
+            invalidate()
+        }
+    }
+
+    private fun updateProjectionDetailsUI(projections: List<MonthlyProjection>) {
+        val container = binding.layoutProjectionDetails
+        container.removeAllViews()
+
+        val activeProjections = projections.filter { it.totalAmount > 0 }
+
+        if (activeProjections.isEmpty()) {
+            val emptyText = TextView(requireContext()).apply {
+                text = getString(R.string.no_projection_expenses)
+                setTextColor(Color.GRAY)
+                textSize = 14f
+                setPadding(0, 16, 0, 16)
+            }
+            container.addView(emptyText)
+            return
+        }
+
+        activeProjections.forEach { proj ->
+            val monthCard = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(16, 12, 16, 16)
+                background = requireContext().getDrawable(R.drawable.rounded_border)
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    bottomMargin = 12
+                }
+            }
+
+            val headerLayout = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            val titleText = TextView(requireContext()).apply {
+                text = proj.monthLabel
+                setTextColor("#2E7D32".toColorInt())
+                textSize = 15f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            }
+
+            val totalText = TextView(requireContext()).apply {
+                text = proj.totalAmount.toCurrency()
+                setTextColor("#2E7D32".toColorInt())
+                textSize = 15f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+            }
+
+            headerLayout.addView(titleText)
+            headerLayout.addView(totalText)
+            monthCard.addView(headerLayout)
+
+            proj.transactions.forEach { trans ->
+                val itemText = TextView(requireContext()).apply {
+                    val desc = if (trans.isInstallment && trans.installmentCurrent != null && trans.installmentTotal != null) {
+                        "${trans.description} (Par. ${trans.installmentCurrent}/${trans.installmentTotal})"
+                    } else {
+                        trans.description
+                    }
+                    text = "• $desc — ${trans.monetaryValue.toCurrency()}"
+                    setTextColor("#455A64".toColorInt())
+                    textSize = 13f
+                    setPadding(8, 4, 0, 0)
+                }
+                monthCard.addView(itemText)
+            }
+
+            container.addView(monthCard)
         }
     }
 
