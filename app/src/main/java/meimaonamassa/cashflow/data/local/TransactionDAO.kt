@@ -31,6 +31,9 @@ interface TransactionDAO {
     @Query("SELECT * FROM transaction_table WHERE payment_date < :monthPrefix || '-01'")
     fun getPreviousTransactions(monthPrefix: String): Flow<List<TransactionEntity>>
 
+    @Query("SELECT * FROM transaction_table WHERE payment_date >= :startDate AND transaction_type = 0 ORDER BY payment_date ASC")
+    fun getFutureExpensesFrom(startDate: String): Flow<List<TransactionEntity>>
+
     @Query("SELECT EXISTS(SELECT 1 FROM transaction_table WHERE payment_date < :date)")
     fun hasTransactionsBefore(date: String): Flow<Boolean>
 
