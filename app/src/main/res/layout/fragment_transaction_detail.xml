@@ -307,14 +307,33 @@
             android:textSize="11sp" />
     </RadioGroup>
 
-    <Button
-        android:id="@+id/button_update"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/layout_detail_buttons"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="@string/button_update"
+        android:gravity="center"
+        android:orientation="horizontal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/group_category" />
+        app:layout_constraintTop_toBottomOf="@id/group_category">
+
+        <Button
+            android:id="@+id/button_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="@string/button_update" />
+
+        <Button
+            android:id="@+id/button_clone"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/button_clone"
+            app:icon="@drawable/ic_clone" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
