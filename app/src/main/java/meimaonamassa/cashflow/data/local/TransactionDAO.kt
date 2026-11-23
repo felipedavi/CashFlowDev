@@ -28,6 +28,9 @@ interface TransactionDAO {
     @Query("SELECT SUM(CASE WHEN transaction_type = 1 THEN monetary_value ELSE -monetary_value END) FROM transaction_table WHERE payment_date < :monthPrefix || '-01'")
     fun getPreviousBalance(monthPrefix: String): Flow<Double?>
 
+    @Query("SELECT * FROM transaction_table WHERE payment_date < :monthPrefix || '-01'")
+    fun getPreviousTransactions(monthPrefix: String): Flow<List<TransactionEntity>>
+
     @Query("SELECT EXISTS(SELECT 1 FROM transaction_table WHERE payment_date < :date)")
     fun hasTransactionsBefore(date: String): Flow<Boolean>
 
