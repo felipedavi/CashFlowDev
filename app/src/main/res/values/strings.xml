@@ -85,7 +85,12 @@
 
     <!-- ChartFragment -->
     <string name="transaction_chart_fragment">Gráficos</string>
-    <string name="text_chart_title">Distribuição Mensal</string>
+    <string name="text_chart_title">Balanço Mensal (Receitas x Despesas)</string>
+    <string name="text_category_chart_title">Distribuição de Despesas por Categoria</string>
+    <string name="text_bar_chart_title">Comparativo: Gasto x Limite (50-30-20)</string>
+    <string name="legend_actual_spent">Gasto Real</string>
+    <string name="legend_target_limit">Limite (50-30-20)</string>
+    <string name="no_expenses_text">Nenhuma despesa neste mês</string>
 
     <!-- Empty List Screen -->
     <string name="desc_icon_empty">Ícone de lista vazia</string>
