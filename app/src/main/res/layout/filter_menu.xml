@@ -45,7 +45,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Conta Bancária"
+        android:text="@string/text_bank_account"
         android:textSize="13sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -64,6 +64,52 @@
         app:layout_constraintTop_toBottomOf="@id/tvFilterBankAccountTitle"
         app:singleSelection="false" />
 
+    <TextView
+        android:id="@+id/tvFilterIssueDateTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/filter_issue_date_title"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chipGroupBankAccount" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupIssueDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        app:chipSpacingHorizontal="6dp"
+        app:chipSpacingVertical="6dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvFilterIssueDateTitle"
+        app:singleSelection="false">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipFilterDefaultIssueDate"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkable="true"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="@string/filter_default_issue_date"
+            android:textSize="13sp"
+            app:chipEndPadding="10dp"
+            app:chipMinHeight="32dp"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="10dp"
+            app:ensureMinTouchTargetSize="false"
+            app:iconEndPadding="0dp"
+            app:iconStartPadding="2dp"
+            app:textEndPadding="2dp"
+            app:textStartPadding="2dp" />
+
+    </com.google.android.material.chip.ChipGroup>
+
     <View
         android:id="@+id/filterDivider"
         android:layout_width="0dp"
@@ -73,6 +119,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/chipGroupBankAccount" />
+        app:layout_constraintTop_toBottomOf="@id/chipGroupIssueDate" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
