@@ -4,6 +4,12 @@
     app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
     <item
+        android:id="@+id/action_filter"
+        android:icon="@drawable/ic_filter_list"
+        android:title="Filtrar"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_summary"
         android:icon="@drawable/ic_pie_chart"
         android:title="@string/transaction_chart_fragment"
