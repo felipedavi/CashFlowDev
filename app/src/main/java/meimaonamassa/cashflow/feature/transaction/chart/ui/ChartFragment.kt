@@ -138,7 +138,16 @@ class ChartFragment : Fragment() {
     }
 
     private fun updateBudgetStatus(transactions: List<TransactionEntity>, totalBudget: Float) {
-        if (totalBudget <= 0) {
+        val configuredBudget = totalBudget.toDouble()
+        val totalIncome = transactions.filter { it.transactionType }.sumOf { it.monetaryValue }
+
+        val effectiveBudget = if (totalIncome > configuredBudget) {
+            totalIncome
+        } else {
+            configuredBudget
+        }
+
+        if (effectiveBudget <= 0) {
             binding.layoutBudgetStatus.visibility = View.GONE
             return
         }
@@ -151,26 +160,26 @@ class ChartFragment : Fragment() {
             val cat = trans.category ?: ""
             if (spent.containsKey(cat)) {
                 spent[cat] = spent[cat]!! + trans.monetaryValue
+            } else if (cat.equals("Investimento", ignoreCase = true)) {
+                spent["Investimentos"] = (spent["Investimentos"] ?: 0.0) + trans.monetaryValue
             }
         }
 
-        val budgetDouble = totalBudget.toDouble()
-
         updateCategoryUI(
             binding.textNeedsStatus, binding.progressNeeds,
-            spent["Necessidades"] ?: 0.0, budgetDouble * 0.5, budgetDouble, "Necessidades",
+            spent["Necessidades"] ?: 0.0, effectiveBudget * 0.5, effectiveBudget, "Necessidades",
             "#2196F3".toColorInt()
         )
 
         updateCategoryUI(
             binding.textWantsStatus, binding.progressWants,
-            spent["Desejos"] ?: 0.0, budgetDouble * 0.3, budgetDouble, "Desejos",
+            spent["Desejos"] ?: 0.0, effectiveBudget * 0.3, effectiveBudget, "Desejos",
             "#FFC107".toColorInt()
         )
 
         updateCategoryUI(
             binding.textInvestmentsStatus, binding.progressInvestments,
-            spent["Investimentos"] ?: 0.0, budgetDouble * 0.2, budgetDouble, "Investimentos",
+            spent["Investimentos"] ?: 0.0, effectiveBudget * 0.2, effectiveBudget, "Investimentos",
             "#9C27B0".toColorInt()
         )
     }
