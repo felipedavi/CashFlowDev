@@ -145,6 +145,19 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
         }
     }
 
+    private val defaultBankOrder = listOf("Carteira", "Flash", "Nubank", "Mercado Pago", "Inter")
+
+    private val bankComparator = Comparator<String> { b1, b2 ->
+        val idx1 = defaultBankOrder.indexOfFirst { it.equals(b1.trim(), ignoreCase = true) }
+        val idx2 = defaultBankOrder.indexOfFirst { it.equals(b2.trim(), ignoreCase = true) }
+        when {
+            idx1 != -1 && idx2 != -1 -> idx1.compareTo(idx2)
+            idx1 != -1 -> -1
+            idx2 != -1 -> 1
+            else -> b1.compareTo(b2, ignoreCase = true)
+        }
+    }
+
     private val _filterDefaultIssueDateOnly = MutableStateFlow(false)
     val filterDefaultIssueDateOnly: StateFlow<Boolean> = _filterDefaultIssueDateOnly.asStateFlow()
 
@@ -161,7 +174,8 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
                 val amount = if (trans.transactionType) trans.monetaryValue else -trans.monetaryValue
                 bankMap[bank] = (bankMap[bank] ?: 0.0) + amount
             }
-            bankMap.toMap()
+            val sortedKeys = bankMap.keys.sortedWith(bankComparator)
+            sortedKeys.associateWith { bankMap[it] ?: 0.0 }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
@@ -201,7 +215,7 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
             list.map { it.bankAccount }
                 .filter { it.isNotBlank() }
                 .distinct()
-                .sorted()
+                .sortedWith(bankComparator)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
