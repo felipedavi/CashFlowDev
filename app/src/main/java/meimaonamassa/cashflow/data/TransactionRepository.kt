@@ -4,6 +4,7 @@ import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import meimaonamassa.cashflow.data.entity.TransactionEntity
 import meimaonamassa.cashflow.data.export.CSVHelper
+import meimaonamassa.cashflow.data.export.CsvImportResult
 import meimaonamassa.cashflow.data.local.TransactionDAO
 import java.io.InputStream
 
@@ -34,8 +35,8 @@ class TransactionRepository(private val dao: TransactionDAO) {
         return CSVHelper.exportTransactions(transactions)
     }
 
-    fun importTransactionsFromCSV(inputStream: InputStream): List<TransactionEntity> {
-        return CSVHelper.importTransactions(inputStream).transactions
+    fun importTransactionsFromCSV(inputStream: InputStream): CsvImportResult {
+        return CSVHelper.importTransactions(inputStream)
     }
 
     suspend fun deleteAll() {
