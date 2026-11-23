@@ -103,6 +103,9 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
     private val _selectedBankAccounts = MutableStateFlow<Set<String>>(emptySet())
     val selectedBankAccounts: StateFlow<Set<String>> = _selectedBankAccounts.asStateFlow()
 
+    private val _filterDefaultIssueDateOnly = MutableStateFlow(false)
+    val filterDefaultIssueDateOnly: StateFlow<Boolean> = _filterDefaultIssueDateOnly.asStateFlow()
+
     val availableBankAccounts: StateFlow<List<String>> = transactionsByMonthFlow
         .map { list ->
             list.map { it.bankAccount }
@@ -114,12 +117,13 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
 
     val filteredTransactions: StateFlow<List<TransactionEntity>> = combine(
         transactionsByMonthFlow,
-        _selectedBankAccounts
-    ) { transactions, selectedAccounts ->
-        if (selectedAccounts.isEmpty()) {
-            transactions
-        } else {
-            transactions.filter { it.bankAccount in selectedAccounts }
+        _selectedBankAccounts,
+        _filterDefaultIssueDateOnly
+    ) { transactions, selectedAccounts, defaultIssueDateOnly ->
+        transactions.filter { transaction ->
+            val matchesBank = selectedAccounts.isEmpty() || transaction.bankAccount in selectedAccounts
+            val matchesIssueDate = !defaultIssueDateOnly || transaction.issueDate.year == 1900
+            matchesBank && matchesIssueDate
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -129,7 +133,12 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
         }
     }
 
+    fun toggleDefaultIssueDateFilter(isChecked: Boolean) {
+        _filterDefaultIssueDateOnly.value = isChecked
+    }
+
     fun clearAllFilters() {
         _selectedBankAccounts.value = emptySet()
+        _filterDefaultIssueDateOnly.value = false
     }
 }
