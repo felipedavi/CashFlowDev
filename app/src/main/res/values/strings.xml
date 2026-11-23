@@ -96,10 +96,14 @@
     <string name="tab_chart_progress">Progresso (50–30–20)</string>
     <string name="tab_chart_balance">Balanço Mensal</string>
     <string name="tab_chart_bank_accounts">Saldo por Conta</string>
+    <string name="tab_chart_projection">Projeção</string>
     <string name="tab_chart_categories">Categorias</string>
     <string name="tab_chart_comparison">Comparativo</string>
     <string name="tab_chart_all">Todos</string>
     <string name="text_bank_accounts_chart_title">Saldo por Conta Bancária</string>
+    <string name="text_projection_chart_title">Projeção de Gastos Futuros (Próximos 6 Meses)</string>
+    <string name="projection_summary_format">Com base nas parcelas e compromissos ativos, seu gasto mínimo em %1$s será de %2$s.</string>
+    <string name="no_projection_expenses">Nenhuma parcela futura ativa nos próximos 6 meses</string>
 
     <!-- Empty List Screen -->
     <string name="desc_icon_empty">Ícone de lista vazia</string>
