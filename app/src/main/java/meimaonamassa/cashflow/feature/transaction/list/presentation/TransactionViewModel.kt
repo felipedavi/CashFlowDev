@@ -57,12 +57,19 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
     }.asLiveData()
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    val previousBalance: LiveData<Double> = monthPrefixFlow
+        .flatMapLatest { prefix -> repository.getPreviousBalance(prefix) }
+        .map { it ?: 0.0 }
+        .asLiveData()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     val balance: LiveData<Double> = monthPrefixFlow.flatMapLatest { prefix ->
         combine(
+            repository.getPreviousBalance(prefix),
             repository.getTotalIncomeByMonth(prefix),
             repository.getTotalExpenseByMonth(prefix)
-        ) { income, expense ->
-            (income ?: 0.0) - (expense ?: 0.0)
+        ) { prevBalance, income, expense ->
+            (prevBalance ?: 0.0) + (income ?: 0.0) - (expense ?: 0.0)
         }
     }.asLiveData()
 
