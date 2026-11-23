@@ -19,7 +19,7 @@ import meimaonamassa.cashflow.data.TransactionRepository
 import meimaonamassa.cashflow.data.entity.TransactionEntity
 import org.threeten.bp.YearMonth
 
-class TransactionViewModel(private val repository: TransactionRepository): ViewModel() {
+class TransactionViewModel(private val repository: TransactionRepository) : ViewModel() {
 
     val currentMonth = MutableStateFlow(YearMonth.now())
 
@@ -28,8 +28,10 @@ class TransactionViewModel(private val repository: TransactionRepository): ViewM
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val allTransactions: LiveData<List<TransactionEntity>> = monthPrefixFlow
+    private val transactionsByMonthFlow = monthPrefixFlow
         .flatMapLatest { prefix -> repository.getTransactionsByMonth(prefix) }
+
+    val allTransactions: LiveData<List<TransactionEntity>> = transactionsByMonthFlow
         .asLiveData()
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -65,10 +67,12 @@ class TransactionViewModel(private val repository: TransactionRepository): ViewM
     }.asLiveData()
 
     fun nextMonth() {
+        clearAllFilters()
         currentMonth.value = currentMonth.value.plusMonths(1)
     }
 
     fun previousMonth() {
+        clearAllFilters()
         currentMonth.value = currentMonth.value.minusMonths(1)
     }
 
@@ -99,9 +103,7 @@ class TransactionViewModel(private val repository: TransactionRepository): ViewM
     private val _selectedBankAccounts = MutableStateFlow<Set<String>>(emptySet())
     val selectedBankAccounts: StateFlow<Set<String>> = _selectedBankAccounts.asStateFlow()
 
-    private val _allTransactions = MutableStateFlow<List<TransactionEntity>>(emptyList())
-
-    val availableBankAccounts: StateFlow<List<String>> = _allTransactions
+    val availableBankAccounts: StateFlow<List<String>> = transactionsByMonthFlow
         .map { list ->
             list.map { it.bankAccount }
                 .filter { it.isNotBlank() }
@@ -111,7 +113,7 @@ class TransactionViewModel(private val repository: TransactionRepository): ViewM
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val filteredTransactions: StateFlow<List<TransactionEntity>> = combine(
-        _allTransactions,
+        transactionsByMonthFlow,
         _selectedBankAccounts
     ) { transactions, selectedAccounts ->
         if (selectedAccounts.isEmpty()) {
