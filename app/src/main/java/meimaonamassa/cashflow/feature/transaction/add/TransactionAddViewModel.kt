@@ -13,6 +13,8 @@ import kotlinx.coroutines.withContext
 class TransactionAddViewModel(private val repository: TransactionRepository) : ViewModel() {
     val distinctBanks: LiveData<List<String>> = repository.getDistinctBanks()
 
+    fun getTransaction(id: Int): LiveData<TransactionEntity> = repository.get(id)
+
     fun insert(transaction: TransactionEntity) {
         viewModelScope.launch {
             withContext(Dispatchers.IO + NonCancellable) {
