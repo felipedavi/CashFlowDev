@@ -17,7 +17,7 @@ data class CsvImportResult(
 object CSVHelper {
     private val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     private const val DELIMITER = ";"
-    private val VALID_EXPENSE_CATEGORIES = setOf("Necessidades", "Desejos", "Investimento")
+    private val VALID_EXPENSE_CATEGORIES = setOf("Necessidades", "Desejos", "Investimentos", "Investimento")
     private val DEFAULT_ISSUE_DATE: OffsetDateTime = OffsetDateTime.of(1900, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
 
     private const val HEADER =
@@ -166,11 +166,11 @@ object CSVHelper {
                         }
                         if (matchedCategory == null) {
                             val motivo = if (rawCategory.isEmpty()) "vazia" else "'$rawCategory'"
-                            warnings.add("Linha $lineNumber: categoria $motivo inválida para despesa (use Necessidades, Desejos ou Investimento).")
+                            warnings.add("Linha $lineNumber: categoria $motivo inválida para despesa (use Necessidades, Desejos ou Investimentos).")
                             line = r.readLine()
                             continue
                         }
-                        matchedCategory
+                        if (matchedCategory.equals("Investimento", ignoreCase = true)) "Investimentos" else matchedCategory
                     } else {
                         rawCategory.ifEmpty { null }
                     }
