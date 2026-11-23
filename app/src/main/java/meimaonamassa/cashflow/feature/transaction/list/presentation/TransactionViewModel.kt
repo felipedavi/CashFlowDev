@@ -72,7 +72,7 @@ class TransactionViewModel(private val repository: TransactionRepository): ViewM
         val firstDayOfMonth = month.atDay(1).toString()
         val now = YearMonth.now()
         repository.hasTransactionsBefore(firstDayOfMonth).map { hasBefore ->
-            if (month > now) true else hasBefore
+            month > now || hasBefore
         }
     }.asLiveData()
 
@@ -81,7 +81,7 @@ class TransactionViewModel(private val repository: TransactionRepository): ViewM
         val firstDayOfNextMonth = month.plusMonths(1).atDay(1).toString()
         val now = YearMonth.now()
         repository.hasTransactionsAfter(firstDayOfNextMonth).map { hasAfter ->
-            if (month < now) true else hasAfter
+            month < now || hasAfter
         }
     }.asLiveData()
 
