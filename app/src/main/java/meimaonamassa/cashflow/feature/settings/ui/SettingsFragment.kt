@@ -16,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import meimaonamassa.cashflow.MainApplication
 import meimaonamassa.cashflow.R
+import meimaonamassa.cashflow.data.export.CsvImportResult
 import meimaonamassa.cashflow.databinding.FragmentSettingsBinding
 import meimaonamassa.cashflow.feature.settings.SettingsViewModel
 import meimaonamassa.cashflow.feature.settings.SettingsViewModelFactory
@@ -58,11 +59,12 @@ class SettingsFragment : Fragment() {
                 inputStream?.let { stream ->
                     viewModel.importData(
                         inputStream = stream,
-                        onSuccess = {
-                            val result = Bundle()
-                            result.putString("action", "import")
-                            setFragmentResult("settingsAction", result)
-                            findNavController().popBackStack()
+                        onSuccess = { importResult ->
+                            if (importResult.warnings.isNotEmpty()) {
+                                showImportWarningsDialog(importResult)
+                            } else {
+                                finishImport()
+                            }
                         },
                         onError = {
                             Toast.makeText(
@@ -172,5 +174,34 @@ class SettingsFragment : Fragment() {
                 dialog.dismiss()
             }
             .show()
+    }
+
+    private fun showImportWarningsDialog(importResult: CsvImportResult) {
+        if (!isAdded) return
+
+        val message = buildString {
+            append("${importResult.transactions.size} transação(ões) importada(s) com sucesso.\n\n")
+            append("As seguintes linhas foram ignoradas por estarem fora do padrão:\n")
+            append(importResult.warnings.joinToString("\n• ", prefix = "• "))
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Aviso na importação")
+            .setMessage(message)
+            .setCancelable(false)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+                if (importResult.transactions.isNotEmpty()) {
+                    finishImport()
+                }
+            }
+            .show()
+    }
+
+    private fun finishImport() {
+        val result = Bundle()
+        result.putString("action", "import")
+        setFragmentResult("settingsAction", result)
+        findNavController().popBackStack()
     }
 }
