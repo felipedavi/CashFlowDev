@@ -34,49 +34,6 @@
             app:layout_constraintTop_toBottomOf="@id/text_chart_title"
             tools:background="#F0F0F0" />
 
-        <TextView
-            android:id="@+id/text_category_chart_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/text_category_chart_title"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/pieChart" />
-
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/pieChartCategories"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_category_chart_title" />
-
-        <TextView
-            android:id="@+id/text_bar_chart_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/text_bar_chart_title"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/pieChartCategories" />
-
-        <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/barChartCategoryComparison"
-            android:layout_width="0dp"
-            android:layout_height="260dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_bar_chart_title" />
-
         <LinearLayout
             android:id="@+id/layout_budget_status"
             android:layout_width="0dp"
@@ -85,7 +42,7 @@
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/barChartCategoryComparison">
+            app:layout_constraintTop_toBottomOf="@id/pieChart">
 
             <TextView
                 android:id="@+id/text_needs_status"
@@ -136,6 +93,49 @@
                 android:max="100" />
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_category_chart_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/text_category_chart_title"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_budget_status" />
+
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/pieChartCategories"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_category_chart_title" />
+
+        <TextView
+            android:id="@+id/text_bar_chart_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/text_bar_chart_title"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pieChartCategories" />
+
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/barChartCategoryComparison"
+            android:layout_width="0dp"
+            android:layout_height="260dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_bar_chart_title" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
