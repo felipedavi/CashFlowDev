@@ -23,6 +23,7 @@ import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.google.android.material.tabs.TabLayout
 import meimaonamassa.cashflow.MainApplication
 import meimaonamassa.cashflow.R
 import meimaonamassa.cashflow.data.entity.TransactionEntity
@@ -74,6 +75,8 @@ class ChartFragment : Fragment() {
     }
 
     private fun setupChartConfiguration() {
+        setupTabs()
+
         binding.pieChart.apply {
             description.isEnabled = false
             isDrawHoleEnabled = true
@@ -129,6 +132,43 @@ class ChartFragment : Fragment() {
             }
             axisRight.isEnabled = false
         }
+    }
+
+    private fun setupTabs() {
+        binding.tabLayoutCharts.removeAllTabs()
+        binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_progress)), true)
+        binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_balance)))
+        binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_categories)))
+        binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_comparison)))
+        binding.tabLayoutCharts.addTab(binding.tabLayoutCharts.newTab().setText(getString(R.string.tab_chart_all)))
+
+        binding.tabLayoutCharts.clearOnTabSelectedListeners()
+        binding.tabLayoutCharts.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                updateChartVisibility(tab?.position ?: 0)
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
+
+        updateChartVisibility(0)
+    }
+
+    private fun updateChartVisibility(position: Int) {
+        val showProgress = position == 0 || position == 4
+        val showBalance = position == 1 || position == 4
+        val showCategories = position == 2 || position == 4
+        val showComparison = position == 3 || position == 4
+
+        binding.layoutBudgetStatus.visibility = if (showProgress) View.VISIBLE else View.GONE
+        binding.pieChart.visibility = if (showBalance) View.VISIBLE else View.GONE
+
+        binding.textCategoryChartTitle.visibility = if (showCategories) View.VISIBLE else View.GONE
+        binding.pieChartCategories.visibility = if (showCategories) View.VISIBLE else View.GONE
+
+        binding.textBarChartTitle.visibility = if (showComparison) View.VISIBLE else View.GONE
+        binding.barChartCategoryComparison.visibility = if (showComparison) View.VISIBLE else View.GONE
     }
 
     private fun observeFinancialData() {
@@ -214,36 +254,29 @@ class ChartFragment : Fragment() {
 
         updateCategoryPieChart(spent, totalExpenses)
 
-        if (effectiveBudget <= 0) {
-            binding.layoutBudgetStatus.visibility = View.GONE
-            binding.textBarChartTitle.visibility = View.GONE
-            binding.barChartCategoryComparison.visibility = View.GONE
-            return
+        if (effectiveBudget > 0) {
+            updateCategoryBarChart(spent, effectiveBudget)
+
+            updateCategoryUI(
+                binding.textNeedsStatus, binding.progressNeeds,
+                spent["Necessidades"] ?: 0.0, effectiveBudget * 0.5, effectiveBudget, "Necessidades",
+                "#2196F3".toColorInt()
+            )
+
+            updateCategoryUI(
+                binding.textWantsStatus, binding.progressWants,
+                spent["Desejos"] ?: 0.0, effectiveBudget * 0.3, effectiveBudget, "Desejos",
+                "#FFC107".toColorInt()
+            )
+
+            updateCategoryUI(
+                binding.textInvestmentsStatus, binding.progressInvestments,
+                spent["Investimentos"] ?: 0.0, effectiveBudget * 0.2, effectiveBudget, "Investimentos",
+                "#9C27B0".toColorInt()
+            )
         }
 
-        binding.layoutBudgetStatus.visibility = View.VISIBLE
-        binding.textBarChartTitle.visibility = View.VISIBLE
-        binding.barChartCategoryComparison.visibility = View.VISIBLE
-
-        updateCategoryBarChart(spent, effectiveBudget)
-
-        updateCategoryUI(
-            binding.textNeedsStatus, binding.progressNeeds,
-            spent["Necessidades"] ?: 0.0, effectiveBudget * 0.5, effectiveBudget, "Necessidades",
-            "#2196F3".toColorInt()
-        )
-
-        updateCategoryUI(
-            binding.textWantsStatus, binding.progressWants,
-            spent["Desejos"] ?: 0.0, effectiveBudget * 0.3, effectiveBudget, "Desejos",
-            "#FFC107".toColorInt()
-        )
-
-        updateCategoryUI(
-            binding.textInvestmentsStatus, binding.progressInvestments,
-            spent["Investimentos"] ?: 0.0, effectiveBudget * 0.2, effectiveBudget, "Investimentos",
-            "#9C27B0".toColorInt()
-        )
+        updateChartVisibility(binding.tabLayoutCharts.selectedTabPosition)
     }
 
     private fun updateCategoryPieChart(spent: Map<String, Double>, totalExpenses: Double) {
