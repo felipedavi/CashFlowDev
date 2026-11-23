@@ -8,6 +8,8 @@
 
     <!-- General Content Descriptions -->
     <string name="action_filter">Filtrar</string>
+    <string name="filter_issue_date_title">Data de Emissão</string>
+    <string name="filter_default_issue_date">Emissão 01/01/1900</string>
     <string name="rc_content_desc">Lista de transações</string>
     <string name="fab_content_desc">Adicionar nova transação</string>
 
