@@ -18,6 +18,21 @@ import kotlinx.coroutines.launch
 import meimaonamassa.cashflow.data.TransactionRepository
 import meimaonamassa.cashflow.data.entity.TransactionEntity
 import org.threeten.bp.YearMonth
+import org.threeten.bp.format.DateTimeFormatter
+import java.util.Locale
+
+data class MonthlyProjection(
+    val yearMonth: YearMonth,
+    val monthLabel: String,
+    val totalAmount: Double,
+    val transactions: List<TransactionEntity>
+)
+
+data class ProjectionData(
+    val nextMonthLabel: String,
+    val nextMonthAmount: Double,
+    val monthlyProjections: List<MonthlyProjection>
+)
 
 class TransactionViewModel(private val repository: TransactionRepository) : ViewModel() {
 
@@ -149,6 +164,37 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
             bankMap.toMap()
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val futureProjectionData: StateFlow<ProjectionData> = currentMonth.flatMapLatest { month ->
+        val nextMonth = month.plusMonths(1)
+        val startDate = nextMonth.atDay(1).toString()
+        val next6Months = (1..6).map { month.plusMonths(it.toLong()) }
+        val formatter = DateTimeFormatter.ofPattern("MMM/yy", Locale.forLanguageTag("pt-BR"))
+
+        repository.getFutureExpensesFrom(startDate).map { futureExpenses ->
+            val projections = next6Months.map { ym ->
+                val ymExpenses = futureExpenses.filter { trans ->
+                    trans.paymentDate?.let { date ->
+                        YearMonth.of(date.year, date.monthValue) == ym
+                    } ?: false
+                }
+                val total = ymExpenses.sumOf { it.monetaryValue }
+                val label = ym.format(formatter).replaceFirstChar { it.uppercase() }
+                MonthlyProjection(ym, label, total, ymExpenses)
+            }
+
+            val nextMonthFullFormatter = DateTimeFormatter.ofPattern("MMMM/yyyy", Locale.forLanguageTag("pt-BR"))
+            val nextMonthFullLabel = nextMonth.format(nextMonthFullFormatter).replaceFirstChar { it.uppercase() }
+            val nextMonthTotal = projections.firstOrNull()?.totalAmount ?: 0.0
+
+            ProjectionData(
+                nextMonthLabel = nextMonthFullLabel,
+                nextMonthAmount = nextMonthTotal,
+                monthlyProjections = projections
+            )
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ProjectionData("", 0.0, emptyList()))
 
     val availableBankAccounts: StateFlow<List<String>> = transactionsByMonthFlow
         .map { list ->
