@@ -7,6 +7,8 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
@@ -16,8 +18,11 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.launch
 import meimaonamassa.cashflow.MainApplication
 import meimaonamassa.cashflow.R
@@ -32,6 +37,7 @@ import meimaonamassa.cashflow.util.extension.toCurrency
 import org.threeten.bp.YearMonth
 import org.threeten.bp.format.DateTimeFormatter
 import java.util.Locale
+import androidx.core.view.isVisible
 
 class TransactionFragment : Fragment() {
     private lateinit var viewModel: TransactionViewModel
@@ -67,13 +73,17 @@ class TransactionFragment : Fragment() {
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
+                    R.id.action_filter -> {
+                        toggleFilterPanelVisibility()
+                        true
+                    }
                     R.id.settingsFragment, R.id.action_settings -> {
                         findNavController().navigate(R.id.navigateToTransactionSettingsFragment)
                         true
                     }
                     R.id.action_summary -> {
                         val monthStr = viewModel.currentMonth.value.toString()
-                        val action = TransactionFragmentDirections.navigateToSummaryFragment(monthStr) // monthStr com 'r'
+                        val action = TransactionFragmentDirections.navigateToSummaryFragment(monthStr)
                         findNavController().navigate(action)
                         true
                     }
@@ -119,6 +129,8 @@ class TransactionFragment : Fragment() {
         binding.recyclerTransactions.layoutManager = LinearLayoutManager(context)
         binding.recyclerTransactions.adapter = adapter
 
+        setupFilterMenu()
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, systemBars.bottom)
@@ -126,41 +138,29 @@ class TransactionFragment : Fragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.currentMonth.collect { month ->
-                val formattedMonth =
-                    month.format(monthFormatter).replaceFirstChar { it.uppercase() }
-                _binding?.monthSelectorContainer?.textCurrentMonth?.text = formattedMonth
-            }
-        }
-
-        viewModel.allTransactions.observe(viewLifecycleOwner) { transactions ->
-            _binding?.let { safeBinding ->
-                if (transactions.isNullOrEmpty()) {
-                    safeBinding.recyclerTransactions.visibility = View.GONE
-                    safeBinding.emptyContainer.root.visibility = View.VISIBLE
-                    safeBinding.balanceContainer.root.visibility = View.GONE
-                } else {
-                    safeBinding.recyclerTransactions.visibility = View.VISIBLE
-                    safeBinding.emptyContainer.root.visibility = View.GONE
-                    safeBinding.balanceContainer.root.visibility = View.VISIBLE
-
-                    val groupedList = mutableListOf<ListItem>()
-                    val groupedByDate = transactions.groupBy {
-                        it.paymentDate?.let { date ->
-                            DateConverters.fromOffsetDateTime(date)
-                        }
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.currentMonth.collect { month ->
+                        val formattedMonth =
+                            month.format(monthFormatter).replaceFirstChar { it.uppercase() }
+                        _binding?.monthSelectorContainer?.textCurrentMonth?.text = formattedMonth
                     }
-                    groupedByDate.keys.sortedByDescending { it }.forEach { date ->
-                        date?.let { d ->
-                            groupedList.add(ListItem.Header(d.fromFormattedDate()))
-                            val sortedItems =
-                                groupedByDate[d]?.sortedByDescending { it.monetaryValue }
-                            sortedItems?.forEach { transaction ->
-                                groupedList.add(ListItem.TransactionItem(transaction))
-                            }
-                        }
+                }
+
+                launch {
+                    viewModel.availableBankAccounts.collect { accounts ->
+                        populateBankAccountChips(
+                            accounts = accounts,
+                            selectedAccounts = viewModel.selectedBankAccounts.value
+                        )
                     }
-                    adapter.submitList(groupedList)
+                }
+
+                launch {
+                    viewModel.filteredTransactions.collect { transactions ->
+                        renderTransactions(transactions)
+                        updateFilterCounter(transactions.size)
+                    }
                 }
             }
         }
@@ -188,6 +188,93 @@ class TransactionFragment : Fragment() {
         }
 
         setListeners()
+    }
+
+    private fun setupFilterMenu() {
+        val filterView = binding.root.findViewById<View>(R.id.filter_menu_container) ?: return
+        filterView.findViewById<TextView>(R.id.tvFilterBankAccountTitle)?.text = "Conta Bancária"
+
+        filterView.findViewById<ImageButton>(R.id.btnCloseFilter)?.setOnClickListener {
+            filterView.visibility = View.GONE
+        }
+
+        filterView.findViewById<ImageButton>(R.id.btnClearFilters)?.setOnClickListener {
+            viewModel.clearAllFilters()
+            filterView.findViewById<ChipGroup>(R.id.chipGroupBankAccount)?.clearCheck()
+        }
+    }
+
+    private fun populateBankAccountChips(
+        accounts: List<String>,
+        selectedAccounts: Set<String>
+    ) {
+        val filterView = binding.root.findViewById<View>(R.id.filter_menu_container) ?: return
+        val chipGroup = filterView.findViewById<ChipGroup>(R.id.chipGroupBankAccount) ?: return
+        chipGroup.removeAllViews()
+
+        accounts.forEach { account ->
+            val chip = layoutInflater.inflate(
+                R.layout.item_filter_chip,
+                chipGroup,
+                false
+            ) as Chip
+
+            chip.text = account
+            chip.isChecked = account in selectedAccounts
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                viewModel.toggleBankAccountFilter(account, isChecked)
+            }
+
+            chipGroup.addView(chip)
+        }
+    }
+
+    private fun renderTransactions(transactions: List<TransactionEntity>) {
+        _binding?.let { safeBinding ->
+            if (transactions.isEmpty()) {
+                safeBinding.recyclerTransactions.visibility = View.GONE
+                safeBinding.emptyContainer.root.visibility = View.VISIBLE
+                safeBinding.balanceContainer.root.visibility =
+                    if (viewModel.selectedBankAccounts.value.isNotEmpty()) View.VISIBLE else View.GONE
+            } else {
+                safeBinding.recyclerTransactions.visibility = View.VISIBLE
+                safeBinding.emptyContainer.root.visibility = View.GONE
+                safeBinding.balanceContainer.root.visibility = View.VISIBLE
+
+                val groupedList = mutableListOf<ListItem>()
+                val groupedByDate = transactions.groupBy {
+                    it.paymentDate?.let { date ->
+                        DateConverters.fromOffsetDateTime(date)
+                    }
+                }
+                groupedByDate.keys.sortedByDescending { it }.forEach { date ->
+                    date?.let { d ->
+                        groupedList.add(ListItem.Header(d.fromFormattedDate()))
+                        val sortedItems =
+                            groupedByDate[d]?.sortedByDescending { it.monetaryValue }
+                        sortedItems?.forEach { transaction ->
+                            groupedList.add(ListItem.TransactionItem(transaction))
+                        }
+                    }
+                }
+                adapter.submitList(groupedList)
+            }
+        }
+    }
+
+    private fun toggleFilterPanelVisibility() {
+        val filterView = binding.root.findViewById<View>(R.id.filter_menu_container) ?: return
+        filterView.visibility = if (filterView.isVisible) {
+            View.GONE
+        } else {
+            View.VISIBLE
+        }
+    }
+
+    private fun updateFilterCounter(count: Int) {
+        val label = if (count == 1) "1 resultado" else "$count resultados"
+        val filterView = binding.root.findViewById<View>(R.id.filter_menu_container)
+        filterView?.findViewById<TextView>(R.id.tvFilterResultCount)?.text = label
     }
 
     override fun onDestroyView() {
