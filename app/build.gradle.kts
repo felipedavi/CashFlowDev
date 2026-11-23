@@ -23,7 +23,7 @@ android {
             minSdk = N
             targetSdk = VANILLA_ICE_CREAM
             versionCode = 7
-            versionName = "2.5.0"
+            versionName = "2.5.5"
         }
 
         buildTypes {
