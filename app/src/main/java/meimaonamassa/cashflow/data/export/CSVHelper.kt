@@ -2,6 +2,7 @@ package meimaonamassa.cashflow.data.export
 
 import meimaonamassa.cashflow.data.entity.TransactionEntity
 import org.threeten.bp.LocalDate
+import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
 import org.threeten.bp.format.DateTimeFormatter
 import java.io.BufferedReader
@@ -17,15 +18,24 @@ object CSVHelper {
     private val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     private const val DELIMITER = ";"
     private val VALID_EXPENSE_CATEGORIES = setOf("Necessidades", "Desejos", "Investimento")
+    private val DEFAULT_ISSUE_DATE: OffsetDateTime = OffsetDateTime.of(1900, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
 
     private const val HEADER =
-        "payerPayee${DELIMITER}description${DELIMITER}date${DELIMITER}monetaryValue${DELIMITER}transactionType${DELIMITER}isInstallment${DELIMITER}installmentCurrent${DELIMITER}installmentTotal${DELIMITER}category${DELIMITER}bankAccount"
+        "payerPayee${DELIMITER}description${DELIMITER}issueDate${DELIMITER}paymentDate${DELIMITER}monetaryValue${DELIMITER}transactionType${DELIMITER}isInstallment${DELIMITER}installmentCurrent${DELIMITER}installmentTotal${DELIMITER}category${DELIMITER}bankAccount"
 
     fun exportTransactions(transactions: List<TransactionEntity>): String {
         val rows = transactions.map { transaction ->
+            // Se a emissão for a data padrão 01/01/1900, exporta em branco para manter o CSV limpo
+            val issueDateStr = if (transaction.issueDate.toLocalDate() == DEFAULT_ISSUE_DATE.toLocalDate()) {
+                ""
+            } else {
+                transaction.issueDate.format(formatter)
+            }
+
             listOf(
                 escapeCSV(transaction.payerPayee),
                 escapeCSV(transaction.description),
+                issueDateStr,
                 transaction.paymentDate?.format(formatter) ?: "",
                 transaction.monetaryValue.toString(),
                 transaction.transactionType.toString(),
@@ -53,7 +63,6 @@ object CSVHelper {
         val reader = BufferedReader(InputStreamReader(inputStream))
 
         reader.use { r ->
-            // Linha 1 é o cabeçalho
             r.readLine()
             var lineNumber = 1
 
@@ -64,7 +73,8 @@ object CSVHelper {
                 if (line.isNotBlank()) {
                     val tokens = parseCSVLine(line)
 
-                    if (tokens.size < 5) {
+                    // Agora exigimos pelo menos 6 colunas (até transactionType)
+                    if (tokens.size < 6) {
                         warnings.add("Linha $lineNumber: quantidade de colunas insuficiente.")
                         line = r.readLine()
                         continue
@@ -72,9 +82,10 @@ object CSVHelper {
 
                     val payerPayee = tokens[0].trim()
                     val description = tokens[1].trim()
-                    val dateStr = tokens[2].trim()
-                    val valueStr = tokens[3].trim()
-                    val typeStr = tokens[4].trim().lowercase()
+                    val issueDateStr = tokens[2].trim()
+                    val paymentDateStr = tokens[3].trim()
+                    val valueStr = tokens[4].trim()
+                    val typeStr = tokens[5].trim().lowercase()
 
                     // 1. Valida Pagador/Recebedor
                     if (payerPayee.isEmpty()) {
@@ -83,22 +94,39 @@ object CSVHelper {
                         continue
                     }
 
-                    // 2. Valida Data (pode ser vazia, mas se preenchida deve estar no padrão dd/MM/yyyy)
-                    val parsedDate = if (dateStr.isNotEmpty()) {
+                    // 2. Valida Emissão (Opcional: se vazio assume 01/01/1900; se preenchido valida o formato)
+                    val parsedIssueDate = if (issueDateStr.isNotEmpty()) {
                         try {
-                            LocalDate.parse(dateStr, formatter)
+                            LocalDate.parse(issueDateStr, formatter)
                                 .atStartOfDay(ZoneOffset.UTC)
                                 .toOffsetDateTime()
-                        } catch (e: Exception) {
-                            warnings.add("Linha $lineNumber: data '$dateStr' inválida (esperado dd/MM/yyyy).")
+                        } catch (_: Exception) {
+                            warnings.add("Linha $lineNumber: data de emissão '$issueDateStr' inválida (esperado dd/MM/yyyy).")
                             line = r.readLine()
                             continue
                         }
                     } else {
-                        null
+                        DEFAULT_ISSUE_DATE
                     }
 
-                    // 3. Valida Valor Monetário
+                    // 3. Valida Vencimento/Recebimento (Obrigatório)
+                    if (paymentDateStr.isEmpty()) {
+                        warnings.add("Linha $lineNumber: data de vencimento/recebimento é obrigatória e está vazia.")
+                        line = r.readLine()
+                        continue
+                    }
+
+                    val parsedPaymentDate = try {
+                        LocalDate.parse(paymentDateStr, formatter)
+                            .atStartOfDay(ZoneOffset.UTC)
+                            .toOffsetDateTime()
+                    } catch (_: Exception) {
+                        warnings.add("Linha $lineNumber: data de vencimento/recebimento '$paymentDateStr' inválida (esperado dd/MM/yyyy).")
+                        line = r.readLine()
+                        continue
+                    }
+
+                    // 4. Valida Valor Monetário
                     val monetaryValue = valueStr.toDoubleOrNull()
                     if (monetaryValue == null || monetaryValue <= 0.0) {
                         warnings.add("Linha $lineNumber: valor '$valueStr' inválido.")
@@ -106,7 +134,7 @@ object CSVHelper {
                         continue
                     }
 
-                    // 4. Valida Tipo da Transação (true = Receita, false = Despesa)
+                    // 5. Valida Tipo da Transação (true = Receita, false = Despesa)
                     val transactionType = when (typeStr) {
                         "true" -> true
                         "false" -> false
@@ -117,12 +145,12 @@ object CSVHelper {
                         }
                     }
 
-                    // 5. Valida Parcelamento
-                    val isInstallment = tokens.size > 5 && tokens[5].trim().equals("true", ignoreCase = true)
+                    // 6. Valida Parcelamento (índices deslocados +1)
+                    val isInstallment = tokens.size > 6 && tokens[6].trim().equals("true", ignoreCase = true)
                     val installmentCurrent =
-                        if (tokens.size > 6 && tokens[6].isNotBlank()) tokens[6].trim().toIntOrNull() else null
-                    val installmentTotal =
                         if (tokens.size > 7 && tokens[7].isNotBlank()) tokens[7].trim().toIntOrNull() else null
+                    val installmentTotal =
+                        if (tokens.size > 8 && tokens[8].isNotBlank()) tokens[8].trim().toIntOrNull() else null
 
                     if (isInstallment && (installmentCurrent == null || installmentTotal == null || installmentCurrent <= 0 || installmentTotal <= 0)) {
                         warnings.add("Linha $lineNumber: dados de parcelamento inválidos.")
@@ -130,8 +158,8 @@ object CSVHelper {
                         continue
                     }
 
-                    // 6. Valida Categoria (Despesa exige Necessidades, Desejos ou Investimento)
-                    val rawCategory = if (tokens.size > 8) tokens[8].trim() else ""
+                    // 7. Valida Categoria (índice 9)
+                    val rawCategory = if (tokens.size > 9) tokens[9].trim() else ""
                     val category = if (!transactionType) {
                         val matchedCategory = VALID_EXPENSE_CATEGORIES.firstOrNull {
                             it.equals(rawCategory, ignoreCase = true)
@@ -147,29 +175,31 @@ object CSVHelper {
                         rawCategory.ifEmpty { null }
                     }
 
-                    // 7. Conta Bancária (único campo que assume "Carteira" se vier vazio)
-                    val hasBankAccount = tokens.size > 9 && tokens[9].isNotBlank()
+                    // 8. Conta Bancária (índice 10 - assume "Carteira" se vazio)
+                    val hasBankAccount = tokens.size > 10 && tokens[10].isNotBlank()
 
                     val entity = if (hasBankAccount) {
                         TransactionEntity(
                             id = 0,
                             payerPayee = payerPayee,
                             description = description,
-                            paymentDate = parsedDate,
+                            issueDate = parsedIssueDate,
+                            paymentDate = parsedPaymentDate,
                             monetaryValue = monetaryValue,
                             transactionType = transactionType,
                             isInstallment = isInstallment,
                             installmentCurrent = installmentCurrent,
                             installmentTotal = installmentTotal,
                             category = category,
-                            bankAccount = tokens[9].trim()
+                            bankAccount = tokens[10].trim()
                         )
                     } else {
                         TransactionEntity(
                             id = 0,
                             payerPayee = payerPayee,
                             description = description,
-                            paymentDate = parsedDate,
+                            issueDate = parsedIssueDate,
+                            paymentDate = parsedPaymentDate,
                             monetaryValue = monetaryValue,
                             transactionType = transactionType,
                             isInstallment = isInstallment,
