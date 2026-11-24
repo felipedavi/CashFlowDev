@@ -114,6 +114,13 @@
     <string name="transaction_settings_fragment">Configurações</string>
     <string name="input_layout_buget">Orçamento Mensal Total</string>
     <string name="button_save_budget">Salvar Orçamento</string>
+    <string name="settings_section_financial">Planejamento Financeiro</string>
+    <string name="settings_section_data">Dados e Backup</string>
+    <string name="settings_section_info">Informações</string>
+    <string name="settings_export_desc">Salvar cópia de segurança em formato CSV</string>
+    <string name="settings_import_desc">Restaurar transações a partir de um arquivo CSV</string>
+    <string name="settings_delete_desc">Apagar todas as transações permanentemente</string>
+    <string name="settings_about_desc">Versão do aplicativo e contatos</string>
 
     <!-- Settings Actions -->
     <string name="button_import">Importar</string>
