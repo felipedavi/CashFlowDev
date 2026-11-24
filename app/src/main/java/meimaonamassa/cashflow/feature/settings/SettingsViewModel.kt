@@ -1,10 +1,12 @@
 package meimaonamassa.cashflow.feature.settings
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import meimaonamassa.cashflow.base.TransactionDatabase
 import meimaonamassa.cashflow.data.TransactionRepository
 import meimaonamassa.cashflow.data.export.CsvImportResult
 import java.io.InputStream
@@ -55,6 +57,34 @@ class SettingsViewModel(private val repository: TransactionRepository) : ViewMod
                 withContext(Dispatchers.Main) {
                     onError()
                 }
+            }
+        }
+    }
+
+    fun exportDatabase(
+        context: Context,
+        outputStream: OutputStream,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val success = TransactionDatabase.exportDatabase(context, outputStream)
+            withContext(Dispatchers.Main) {
+                if (success) onSuccess() else onError()
+            }
+        }
+    }
+
+    fun importDatabase(
+        context: Context,
+        inputStream: InputStream,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val success = TransactionDatabase.importDatabase(context, inputStream)
+            withContext(Dispatchers.Main) {
+                if (success) onSuccess() else onError()
             }
         }
     }

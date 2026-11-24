@@ -2,6 +2,7 @@ package meimaonamassa.cashflow.feature.settings.ui
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -78,6 +79,61 @@ class SettingsFragment : Fragment() {
             }
         }
 
+    private val exportDbLauncher =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("application/x-sqlite3")) { uri ->
+            uri?.let {
+                val outputStream = requireContext().contentResolver.openOutputStream(it)
+                outputStream?.let { stream ->
+                    viewModel.exportDatabase(
+                        context = requireContext(),
+                        outputStream = stream,
+                        onSuccess = {
+                            Toast.makeText(
+                                requireContext(),
+                                getString(R.string.alert_export_db_success),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        },
+                        onError = {
+                            Toast.makeText(
+                                requireContext(),
+                                getString(R.string.error_export_db_failed),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
+                }
+            }
+        }
+
+    private val importDbLauncher =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            uri?.let {
+                val inputStream = requireContext().contentResolver.openInputStream(it)
+                inputStream?.let { stream ->
+                    viewModel.importDatabase(
+                        context = requireContext(),
+                        inputStream = stream,
+                        onSuccess = {
+                            Toast.makeText(
+                                requireContext(),
+                                getString(R.string.alert_import_db_success),
+                                Toast.LENGTH_LONG
+                            ).show()
+                            restartApp()
+                        },
+                        onError = {
+                            Toast.makeText(
+                                requireContext(),
+                                getString(R.string.error_import_db_failed),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
+                }
+            }
+        }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -117,6 +173,16 @@ class SettingsFragment : Fragment() {
             importCsvLauncher.launch(arrayOf("text/comma-separated-values", "text/csv"))
         }
 
+        binding.buttonExportDb.setOnClickListener {
+            val dateFormat = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault())
+            val currentTime = dateFormat.format(java.util.Date())
+            exportDbLauncher.launch("cashflow_backup_$currentTime.db")
+        }
+
+        binding.buttonImportDb.setOnClickListener {
+            importDbLauncher.launch(arrayOf("*/*", "application/x-sqlite3", "application/octet-stream"))
+        }
+
         binding.buttonDelete.setOnClickListener {
             showClearDataDialog()
         }
@@ -129,6 +195,17 @@ class SettingsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun restartApp() {
+        val currentContext = context ?: return
+        val intent = currentContext.packageManager.getLaunchIntentForPackage(currentContext.packageName)
+        if (intent != null) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
+            activity?.finish()
+            kotlin.system.exitProcess(0)
+        }
     }
 
     private fun showClearDataDialog() {

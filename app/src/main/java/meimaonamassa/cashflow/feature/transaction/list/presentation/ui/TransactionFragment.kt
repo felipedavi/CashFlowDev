@@ -107,6 +107,15 @@ class TransactionFragment : Fragment() {
                     viewModel.currentMonth.value = YearMonth.now()
                 }
 
+                "import_db" -> {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.alert_import_db_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    viewModel.currentMonth.value = YearMonth.now()
+                }
+
                 "delete" -> {
                     Toast.makeText(
                         requireContext(),
@@ -120,6 +129,14 @@ class TransactionFragment : Fragment() {
                     Toast.makeText(
                         requireContext(),
                         getString(R.string.alert_export_data_success),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                "export_db" -> {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.alert_export_db_success),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
