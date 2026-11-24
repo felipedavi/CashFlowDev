@@ -41,8 +41,9 @@
         android:id="@+id/recycler_transactions"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="?attr/actionBarSize"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:paddingBottom="88dp"
         android:contentDescription="@string/rc_content_desc"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -56,9 +57,11 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:contentDescription="@string/fab_content_desc"
+        app:backgroundTint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        app:srcCompat="@drawable/ic_add"
+        app:tint="@color/white" />
 
     <include
         android:id="@+id/empty_container"
