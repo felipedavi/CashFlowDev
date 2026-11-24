@@ -112,12 +112,10 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
     }.asLiveData()
 
     fun nextMonth() {
-        clearAllFilters()
         currentMonth.value = currentMonth.value.plusMonths(1)
     }
 
     fun previousMonth() {
-        clearAllFilters()
         currentMonth.value = currentMonth.value.minusMonths(1)
     }
 
