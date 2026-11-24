@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.textfield.TextInputLayout
 import meimaonamassa.cashflow.MainApplication
 import meimaonamassa.cashflow.R
 import meimaonamassa.cashflow.base.DateConverters
@@ -25,7 +26,8 @@ import meimaonamassa.cashflow.databinding.FragmentTransactionAddBinding
 import meimaonamassa.cashflow.feature.transaction.add.TransactionAddViewModel
 import meimaonamassa.cashflow.feature.transaction.add.TransactionAddViewModelFactory
 import meimaonamassa.cashflow.util.CurrencyTextWatcher
-import meimaonamassa.cashflow.util.DatePickerFragment
+import meimaonamassa.cashflow.util.DatePickerHelper
+import meimaonamassa.cashflow.util.DateTextWatcher
 import meimaonamassa.cashflow.util.extension.fromCurrency
 import meimaonamassa.cashflow.util.extension.fromFormattedDate
 import meimaonamassa.cashflow.util.extension.hideKeyboard
@@ -119,8 +121,8 @@ class TransactionAddFragment : Fragment() {
     private fun setListeners() {
         binding.editMoney.addTextChangedListener(CurrencyTextWatcher(binding.editMoney))
 
-        setupDateField(binding.editIssueDate)
-        setupDateField(binding.editPaymentDate)
+        setupDateField(binding.editIssueDate, binding.tilIssueDate)
+        setupDateField(binding.editPaymentDate, binding.tilPaymentDate)
 
         binding.buttonCalculator.setOnClickListener {
             showCalculatorDialog()
@@ -152,16 +154,14 @@ class TransactionAddFragment : Fragment() {
         binding.buttonSave.setOnClickListener { handleSaveClick() }
     }
 
-    private fun setupDateField(editText: EditText) {
-        editText.keyListener = null
-        editText.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
-            hideKeyboard(view)
-            if (hasFocus) {
-                DatePickerFragment(editText) { selectedDate ->
-                    editText.setText(selectedDate)
-                }.show(requireActivity().supportFragmentManager, "datePicker")
-                editText.clearFocus()
-            }
+    private fun setupDateField(editText: EditText, textInputLayout: TextInputLayout) {
+        editText.inputType = android.text.InputType.TYPE_CLASS_NUMBER
+        editText.keyListener = android.text.method.DigitsKeyListener.getInstance("0123456789/")
+        editText.addTextChangedListener(DateTextWatcher())
+
+        textInputLayout.setEndIconOnClickListener {
+            hideKeyboard(editText)
+            DatePickerHelper.showDatePicker(childFragmentManager, editText)
         }
     }
 
