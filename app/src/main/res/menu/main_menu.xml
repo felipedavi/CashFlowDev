@@ -4,20 +4,26 @@
     app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
     <item
+        android:id="@+id/action_sort"
+        android:icon="@drawable/ic_sort"
+        android:title="@string/action_sort"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/action_filter"
         android:icon="@drawable/ic_filter_list"
         android:title="@string/action_filter"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/action_summary"
         android:icon="@drawable/ic_pie_chart"
         android:title="@string/transaction_chart_fragment"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings"
         android:title="@string/transaction_settings_fragment"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 </menu>

@@ -34,6 +34,29 @@ data class ProjectionData(
     val monthlyProjections: List<MonthlyProjection>
 )
 
+enum class DateType {
+    PAYMENT_DATE,
+    ISSUE_DATE
+}
+
+enum class SortOrder {
+    DATE_DESCENDING,
+    DATE_ASCENDING,
+    AMOUNT_DESCENDING,
+    AMOUNT_ASCENDING
+}
+
+data class TransactionSortConfig(
+    val dateType: DateType = DateType.PAYMENT_DATE,
+    val sortOrder: SortOrder = SortOrder.DATE_DESCENDING
+)
+
+enum class IssueDateFilterMode {
+    ALL,
+    DEFAULT_ONLY,
+    NON_DEFAULT_ONLY
+}
+
 class TransactionViewModel(private val repository: TransactionRepository) : ViewModel() {
 
     val currentMonth = MutableStateFlow(YearMonth.now())
@@ -156,8 +179,12 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
         }
     }
 
-    private val _filterDefaultIssueDateOnly = MutableStateFlow(false)
-    val filterDefaultIssueDateOnly: StateFlow<Boolean> = _filterDefaultIssueDateOnly.asStateFlow()
+    private val _issueDateFilterMode = MutableStateFlow(IssueDateFilterMode.ALL)
+    val issueDateFilterMode: StateFlow<IssueDateFilterMode> = _issueDateFilterMode.asStateFlow()
+
+    val filterDefaultIssueDateOnly: StateFlow<Boolean> = _issueDateFilterMode.map {
+        it == IssueDateFilterMode.DEFAULT_ONLY
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val bankAccountBalances: StateFlow<Map<String, Double>> = monthPrefixFlow.flatMapLatest { prefix ->
@@ -220,14 +247,34 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
     val filteredTransactions: StateFlow<List<TransactionEntity>> = combine(
         transactionsByMonthFlow,
         _selectedBankAccounts,
-        _filterDefaultIssueDateOnly
-    ) { transactions, selectedAccounts, defaultIssueDateOnly ->
+        _issueDateFilterMode
+    ) { transactions, selectedAccounts, issueDateMode ->
         transactions.filter { transaction ->
             val matchesBank = selectedAccounts.isEmpty() || transaction.bankAccount in selectedAccounts
-            val matchesIssueDate = !defaultIssueDateOnly || transaction.issueDate.year == 1900
+            val matchesIssueDate = when (issueDateMode) {
+                IssueDateFilterMode.ALL -> true
+                IssueDateFilterMode.DEFAULT_ONLY -> transaction.issueDate.year == 1900
+                IssueDateFilterMode.NON_DEFAULT_ONLY -> transaction.issueDate.year != 1900
+            }
             matchesBank && matchesIssueDate
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private val _sortConfig = MutableStateFlow(TransactionSortConfig())
+    val sortConfig: StateFlow<TransactionSortConfig> = _sortConfig.asStateFlow()
+
+    fun updateSortConfig(dateType: DateType? = null, sortOrder: SortOrder? = null) {
+        _sortConfig.update { current ->
+            current.copy(
+                dateType = dateType ?: current.dateType,
+                sortOrder = sortOrder ?: current.sortOrder
+            )
+        }
+    }
+
+    fun setIssueDateFilterMode(mode: IssueDateFilterMode) {
+        _issueDateFilterMode.value = mode
+    }
 
     fun toggleBankAccountFilter(account: String, isChecked: Boolean) {
         _selectedBankAccounts.update { current ->
@@ -236,11 +283,11 @@ class TransactionViewModel(private val repository: TransactionRepository) : View
     }
 
     fun toggleDefaultIssueDateFilter(isChecked: Boolean) {
-        _filterDefaultIssueDateOnly.value = isChecked
+        _issueDateFilterMode.value = if (isChecked) IssueDateFilterMode.DEFAULT_ONLY else IssueDateFilterMode.ALL
     }
 
     fun clearAllFilters() {
         _selectedBankAccounts.value = emptySet()
-        _filterDefaultIssueDateOnly.value = false
+        _issueDateFilterMode.value = IssueDateFilterMode.ALL
     }
 }

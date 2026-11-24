@@ -108,6 +108,26 @@
             app:textEndPadding="2dp"
             app:textStartPadding="2dp" />
 
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipFilterNonDefaultIssueDate"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkable="true"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="@string/filter_non_default_issue_date"
+            android:textSize="13sp"
+            app:chipEndPadding="10dp"
+            app:chipMinHeight="32dp"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="10dp"
+            app:ensureMinTouchTargetSize="false"
+            app:iconEndPadding="0dp"
+            app:iconStartPadding="2dp"
+            app:textEndPadding="2dp"
+            app:textStartPadding="2dp" />
+
     </com.google.android.material.chip.ChipGroup>
 
     <View

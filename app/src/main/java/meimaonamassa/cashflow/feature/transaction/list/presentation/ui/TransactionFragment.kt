@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -29,6 +30,10 @@ import meimaonamassa.cashflow.R
 import meimaonamassa.cashflow.base.DateConverters
 import meimaonamassa.cashflow.data.entity.TransactionEntity
 import meimaonamassa.cashflow.databinding.FragmentTransactionBinding
+import meimaonamassa.cashflow.feature.transaction.list.presentation.DateType
+import meimaonamassa.cashflow.feature.transaction.list.presentation.IssueDateFilterMode
+import meimaonamassa.cashflow.feature.transaction.list.presentation.SortOrder
+import meimaonamassa.cashflow.feature.transaction.list.presentation.TransactionSortConfig
 import meimaonamassa.cashflow.feature.transaction.list.presentation.TransactionViewModel
 import meimaonamassa.cashflow.feature.transaction.list.presentation.TransactionViewModelFactory
 import meimaonamassa.cashflow.feature.transaction.list.presentation.ui.adapter.GroupedTransactionAdapter
@@ -73,6 +78,12 @@ class TransactionFragment : Fragment() {
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
+                    R.id.action_sort -> {
+                        val toolbar = requireActivity().findViewById<View>(R.id.toolbar)
+                        val anchor = toolbar?.findViewById<View>(R.id.action_sort) ?: toolbar ?: binding.root
+                        showSortPopupMenu(anchor)
+                        true
+                    }
                     R.id.action_filter -> {
                         toggleFilterPanelVisibility()
                         true
@@ -91,6 +102,59 @@ class TransactionFragment : Fragment() {
                 }
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
+    private fun showSortPopupMenu(anchorView: View) {
+        val wrapper = android.view.ContextThemeWrapper(requireContext(), androidx.appcompat.R.style.ThemeOverlay_AppCompat_Light)
+        val popup = PopupMenu(wrapper, anchorView)
+        popup.menuInflater.inflate(R.menu.sort_menu, popup.menu)
+
+        val currentConfig = viewModel.sortConfig.value
+
+        val dateTypeId = when (currentConfig.dateType) {
+            DateType.PAYMENT_DATE -> R.id.sort_date_payment
+            DateType.ISSUE_DATE -> R.id.sort_date_issue
+        }
+        popup.menu.findItem(dateTypeId)?.isChecked = true
+
+        val sortOrderId = when (currentConfig.sortOrder) {
+            SortOrder.DATE_DESCENDING -> R.id.sort_order_date_desc
+            SortOrder.DATE_ASCENDING -> R.id.sort_order_date_asc
+            SortOrder.AMOUNT_DESCENDING -> R.id.sort_order_amount_desc
+            SortOrder.AMOUNT_ASCENDING -> R.id.sort_order_amount_asc
+        }
+        popup.menu.findItem(sortOrderId)?.isChecked = true
+
+        popup.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.sort_date_payment -> {
+                    viewModel.updateSortConfig(dateType = DateType.PAYMENT_DATE)
+                    true
+                }
+                R.id.sort_date_issue -> {
+                    viewModel.updateSortConfig(dateType = DateType.ISSUE_DATE)
+                    true
+                }
+                R.id.sort_order_date_desc -> {
+                    viewModel.updateSortConfig(sortOrder = SortOrder.DATE_DESCENDING)
+                    true
+                }
+                R.id.sort_order_date_asc -> {
+                    viewModel.updateSortConfig(sortOrder = SortOrder.DATE_ASCENDING)
+                    true
+                }
+                R.id.sort_order_amount_desc -> {
+                    viewModel.updateSortConfig(sortOrder = SortOrder.AMOUNT_DESCENDING)
+                    true
+                }
+                R.id.sort_order_amount_asc -> {
+                    viewModel.updateSortConfig(sortOrder = SortOrder.AMOUNT_ASCENDING)
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -179,23 +243,47 @@ class TransactionFragment : Fragment() {
                 }
 
                 launch {
-                    viewModel.filterDefaultIssueDateOnly.collect { defaultIssueDateOnly ->
+                    viewModel.issueDateFilterMode.collect { mode ->
                         val filterView = binding.root.findViewById<View>(R.id.filter_menu_container)
-                        val chipDefaultIssueDate =
-                            filterView?.findViewById<Chip>(R.id.chipFilterDefaultIssueDate)
-                        if (chipDefaultIssueDate != null && chipDefaultIssueDate.isChecked != defaultIssueDateOnly) {
-                            chipDefaultIssueDate.setOnCheckedChangeListener(null)
-                            chipDefaultIssueDate.isChecked = defaultIssueDateOnly
-                            chipDefaultIssueDate.setOnCheckedChangeListener { _, isChecked ->
-                                viewModel.toggleDefaultIssueDateFilter(isChecked)
+                        val chipDefault = filterView?.findViewById<Chip>(R.id.chipFilterDefaultIssueDate)
+                        val chipNonDefault = filterView?.findViewById<Chip>(R.id.chipFilterNonDefaultIssueDate)
+
+                        val isDefaultChecked = mode == IssueDateFilterMode.DEFAULT_ONLY
+                        val isNonDefaultChecked = mode == IssueDateFilterMode.NON_DEFAULT_ONLY
+
+                        if (chipDefault != null && chipDefault.isChecked != isDefaultChecked) {
+                            chipDefault.setOnCheckedChangeListener(null)
+                            chipDefault.isChecked = isDefaultChecked
+                            chipDefault.setOnCheckedChangeListener { _, isChecked ->
+                                if (isChecked) {
+                                    viewModel.setIssueDateFilterMode(IssueDateFilterMode.DEFAULT_ONLY)
+                                } else {
+                                    viewModel.setIssueDateFilterMode(IssueDateFilterMode.ALL)
+                                }
+                            }
+                        }
+                        if (chipNonDefault != null && chipNonDefault.isChecked != isNonDefaultChecked) {
+                            chipNonDefault.setOnCheckedChangeListener(null)
+                            chipNonDefault.isChecked = isNonDefaultChecked
+                            chipNonDefault.setOnCheckedChangeListener { _, isChecked ->
+                                if (isChecked) {
+                                    viewModel.setIssueDateFilterMode(IssueDateFilterMode.NON_DEFAULT_ONLY)
+                                } else {
+                                    viewModel.setIssueDateFilterMode(IssueDateFilterMode.ALL)
+                                }
                             }
                         }
                     }
                 }
 
                 launch {
-                    viewModel.filteredTransactions.collect { transactions ->
-                        renderTransactions(transactions)
+                    kotlinx.coroutines.flow.combine(
+                        viewModel.filteredTransactions,
+                        viewModel.sortConfig
+                    ) { transactions, sortConfig ->
+                        Pair(transactions, sortConfig)
+                    }.collect { (transactions, sortConfig) ->
+                        renderTransactions(transactions, sortConfig)
                         updateFilterCounter(transactions.size)
                     }
                 }
@@ -236,9 +324,29 @@ class TransactionFragment : Fragment() {
 
         val chipDefaultIssueDate =
             filterView.findViewById<Chip>(R.id.chipFilterDefaultIssueDate)
-        chipDefaultIssueDate?.isChecked = viewModel.filterDefaultIssueDateOnly.value
+        val chipNonDefaultIssueDate =
+            filterView.findViewById<Chip>(R.id.chipFilterNonDefaultIssueDate)
+
+        val currentMode = viewModel.issueDateFilterMode.value
+        chipDefaultIssueDate?.isChecked = currentMode == IssueDateFilterMode.DEFAULT_ONLY
+        chipNonDefaultIssueDate?.isChecked = currentMode == IssueDateFilterMode.NON_DEFAULT_ONLY
+
         chipDefaultIssueDate?.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.toggleDefaultIssueDateFilter(isChecked)
+            if (isChecked) {
+                chipNonDefaultIssueDate?.isChecked = false
+                viewModel.setIssueDateFilterMode(IssueDateFilterMode.DEFAULT_ONLY)
+            } else if (chipNonDefaultIssueDate?.isChecked != true) {
+                viewModel.setIssueDateFilterMode(IssueDateFilterMode.ALL)
+            }
+        }
+
+        chipNonDefaultIssueDate?.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                chipDefaultIssueDate?.isChecked = false
+                viewModel.setIssueDateFilterMode(IssueDateFilterMode.NON_DEFAULT_ONLY)
+            } else if (chipDefaultIssueDate?.isChecked != true) {
+                viewModel.setIssueDateFilterMode(IssueDateFilterMode.ALL)
+            }
         }
 
         filterView.findViewById<ImageButton>(R.id.btnCloseFilter)?.setOnClickListener {
@@ -249,6 +357,7 @@ class TransactionFragment : Fragment() {
             viewModel.clearAllFilters()
             filterView.findViewById<ChipGroup>(R.id.chipGroupBankAccount)?.clearCheck()
             chipDefaultIssueDate?.isChecked = false
+            chipNonDefaultIssueDate?.isChecked = false
         }
     }
 
@@ -277,32 +386,53 @@ class TransactionFragment : Fragment() {
         }
     }
 
-    private fun renderTransactions(transactions: List<TransactionEntity>) {
+    private fun renderTransactions(
+        transactions: List<TransactionEntity>,
+        sortConfig: TransactionSortConfig
+    ) {
         _binding?.let { safeBinding ->
             if (transactions.isEmpty()) {
                 safeBinding.recyclerTransactions.visibility = View.GONE
                 safeBinding.emptyContainer.root.visibility = View.VISIBLE
                 safeBinding.balanceContainer.root.visibility =
-                    if (viewModel.selectedBankAccounts.value.isNotEmpty() || viewModel.filterDefaultIssueDateOnly.value) View.VISIBLE else View.GONE
+                    if (viewModel.selectedBankAccounts.value.isNotEmpty() || viewModel.issueDateFilterMode.value != IssueDateFilterMode.ALL) View.VISIBLE else View.GONE
             } else {
                 safeBinding.recyclerTransactions.visibility = View.VISIBLE
                 safeBinding.emptyContainer.root.visibility = View.GONE
                 safeBinding.balanceContainer.root.visibility = View.VISIBLE
 
                 val groupedList = mutableListOf<ListItem>()
-                val groupedByDate = transactions.groupBy {
-                    it.paymentDate?.let { date ->
-                        DateConverters.fromOffsetDateTime(date)
+                val groupedByDate = transactions.groupBy { transaction ->
+                    val targetDate = if (sortConfig.dateType == DateType.ISSUE_DATE) {
+                        transaction.issueDate
+                    } else {
+                        transaction.paymentDate ?: transaction.issueDate
+                    }
+                    DateConverters.fromOffsetDateTime(targetDate)
+                }
+
+                val dateKeys = groupedByDate.keys.filterNotNull()
+                val sortedDateKeys = when (sortConfig.sortOrder) {
+                    SortOrder.DATE_ASCENDING -> dateKeys.sortedBy { it }
+                    SortOrder.DATE_DESCENDING -> dateKeys.sortedByDescending { it }
+                    SortOrder.AMOUNT_DESCENDING -> dateKeys.sortedByDescending { date ->
+                        groupedByDate[date]?.maxOfOrNull { it.monetaryValue } ?: 0.0
+                    }
+                    SortOrder.AMOUNT_ASCENDING -> dateKeys.sortedBy { date ->
+                        groupedByDate[date]?.minOfOrNull { it.monetaryValue } ?: 0.0
                     }
                 }
-                groupedByDate.keys.sortedByDescending { it }.forEach { date ->
-                    date?.let { d ->
-                        groupedList.add(ListItem.Header(d.fromFormattedDate()))
-                        val sortedItems =
-                            groupedByDate[d]?.sortedByDescending { it.monetaryValue }
-                        sortedItems?.forEach { transaction ->
-                            groupedList.add(ListItem.TransactionItem(transaction))
-                        }
+
+                sortedDateKeys.forEach { d ->
+                    groupedList.add(ListItem.Header(d.fromFormattedDate()))
+                    val itemsInGroup = groupedByDate[d] ?: emptyList()
+                    val sortedItems = when (sortConfig.sortOrder) {
+                        SortOrder.AMOUNT_ASCENDING -> itemsInGroup.sortedBy { it.monetaryValue }
+                        SortOrder.AMOUNT_DESCENDING -> itemsInGroup.sortedByDescending { it.monetaryValue }
+                        else -> itemsInGroup.sortedByDescending { it.monetaryValue }
+                    }
+                    sortedItems.forEach { transaction ->
+                        groupedList.add(ListItem.TransactionItem(transaction))
                     }
                 }
                 adapter.submitList(groupedList)
