@@ -1,356 +1,443 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:padding="16dp"
+    android:fillViewport="true"
     tools:context="meimaonamassa.cashflow.feature.transaction.add.ui.TransactionAddFragment">
 
-    <TextView
-        android:id="@+id/text_payer_payee"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:labelFor="@id/edit_payer_payee"
-        android:text="@string/text_payer_payee"
-        android:textColor="#546E7A"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/edit_payer_payee"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:autofillHints="name"
-        android:inputType="textPersonName"
-        android:minHeight="48dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_payer_payee"
-        app:layout_constraintWidth_max="488dp" />
-
-    <TextView
-        android:id="@+id/text_description"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:labelFor="@id/edit_description"
-        android:text="@string/text_description"
-        android:textColor="#546E7A"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/edit_payer_payee"
-        app:layout_constraintWidth_max="488dp" />
-
-    <EditText
-        android:id="@+id/edit_description"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:importantForAutofill="no"
-        android:inputType="text"
-        android:minHeight="48dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_description"
-        app:layout_constraintWidth_max="488dp" />
-
-    <TextView
-        android:id="@+id/text_issue_date"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:labelFor="@id/edit_issue_date"
-        android:text="@string/text_issue_date"
-        android:textColor="#546E7A"
-        app:layout_constraintEnd_toStartOf="@id/text_payment_date"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/edit_description" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_issue_date"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        app:endIconContentDescription="Abrir calendário"
-        app:endIconDrawable="@drawable/ic_calendar"
-        app:endIconMode="custom"
-        app:hintEnabled="false"
-        app:layout_constraintEnd_toStartOf="@id/til_payment_date"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_issue_date">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edit_issue_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:importantForAutofill="no"
-            android:inputType="number"
-            android:maxLength="10"
-            android:minHeight="48dp" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <TextView
-        android:id="@+id/text_payment_date"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:labelFor="@id/edit_payment_date"
-        android:text="@string/text_payment_date"
-        android:textColor="#546E7A"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_issue_date"
-        app:layout_constraintTop_toBottomOf="@id/edit_description" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_payment_date"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        app:endIconContentDescription="Abrir calendário"
-        app:endIconDrawable="@drawable/ic_calendar"
-        app:endIconMode="custom"
-        app:hintEnabled="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/til_issue_date"
-        app:layout_constraintTop_toBottomOf="@id/text_payment_date">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edit_payment_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:importantForAutofill="no"
-            android:inputType="number"
-            android:maxLength="10"
-            android:minHeight="48dp" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <TextView
-        android:id="@+id/text_money"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:labelFor="@id/edit_money"
-        android:text="@string/text_money"
-        android:textColor="#546E7A"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/til_payment_date" />
-
-    <EditText
-        android:id="@+id/edit_money"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:clickable="false"
-        android:importantForAutofill="no"
-        android:inputType="number"
-        android:maxLength="19"
-        android:minHeight="48dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_money"
-        app:layout_constraintWidth_max="488dp" />
-
-    <TextView
-        android:id="@+id/text_bank_account"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/text_bank_account"
-        android:textColor="#546E7A"
-        android:labelFor="@id/actv_bank_account"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/edit_money" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_bank_account"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_bank_account"
-        app:layout_constraintWidth_max="488dp">
-
-        <AutoCompleteTextView
-            android:id="@+id/actv_bank_account"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:completionThreshold="1"
-            android:inputType="textCapWords"
-            android:minHeight="48dp" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <TextView
-        android:id="@+id/text_transaction_type"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/text_transaction_type"
-        android:textColor="#546E7A"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/til_bank_account" />
-
-    <RadioGroup
-        android:id="@+id/group_radio_transaction_type"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_transaction_type"
-        app:layout_constraintWidth_max="488dp">
-
-        <RadioButton
-            android:id="@+id/radio_income"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:minHeight="48dp"
-            android:text="@string/radio_income" />
-
-        <RadioButton
-            android:id="@+id/radio_expense"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:minHeight="48dp"
-            android:text="@string/radio_expense" />
-    </RadioGroup>
-
-    <CheckBox
-        android:id="@+id/check_installment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:enabled="true"
-        android:text="@string/check_installment"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/group_radio_transaction_type" />
-
     <LinearLayout
-        android:id="@+id/layout_installments"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/check_installment"
-        app:layout_constraintLeft_toRightOf="@id/check_installment"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@id/check_installment"
-        app:layout_constraintWidth_max="488dp"
-        tools:visibility="visible">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <EditText
-            android:id="@+id/edit_installment_current"
-            android:layout_width="0dp"
+        <!-- Card 1: Informações da Transação -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:autofillHints="phone"
-            android:hint="@string/edit_installment_current"
-            android:inputType="number"
-            android:minHeight="48dp" />
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:strokeColor="#E0E0E0"
+            app:strokeWidth="1dp">
 
-        <TextView
-            android:id="@+id/text_installment_slash"
-            android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Pagador / Recebedor -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_payer_payee"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:startIconDrawable="@drawable/ic_person">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_payer_payee"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:autofillHints="name"
+                        android:hint="@string/text_payer_payee"
+                        android:inputType="textPersonName"
+                        android:minHeight="48dp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Hidden TextView for ViewBinding compatibility -->
+                <TextView
+                    android:id="@+id/text_payer_payee"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+
+                <!-- Descrição -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_description"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:startIconDrawable="@drawable/ic_notes">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/text_description"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:minHeight="48dp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Hidden TextView for ViewBinding compatibility -->
+                <TextView
+                    android:id="@+id/text_description"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Card 2: Datas, Valor e Conta -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="4dp"
-            android:text="@string/text_installment_slash"
-            android:textSize="18sp" />
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:strokeColor="#E0E0E0"
+            app:strokeWidth="1dp">
 
-        <EditText
-            android:id="@+id/edit_installment_final"
-            android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Datas (Emissão e Vencimento/Recebimento) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/text_issue_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp"
+                            android:text="@string/text_issue_date"
+                            android:textColor="#546E7A"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/til_issue_date"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:endIconContentDescription="Abrir calendário"
+                            app:endIconDrawable="@drawable/ic_calendar"
+                            app:endIconMode="custom"
+                            app:hintEnabled="false">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/edit_issue_date"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:importantForAutofill="no"
+                                android:inputType="number"
+                                android:maxLength="10"
+                                android:minHeight="48dp" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/text_payment_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp"
+                            android:text="@string/text_payment_date"
+                            android:textColor="#546E7A"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/til_payment_date"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:endIconContentDescription="Abrir calendário"
+                            app:endIconDrawable="@drawable/ic_calendar"
+                            app:endIconMode="custom"
+                            app:hintEnabled="false">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/edit_payment_date"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:importantForAutofill="no"
+                                android:inputType="number"
+                                android:maxLength="10"
+                                android:minHeight="48dp" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Valor -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_money"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:startIconDrawable="@drawable/ic_cash">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_money"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/text_money"
+                        android:importantForAutofill="no"
+                        android:inputType="numberDecimal"
+                        android:maxLength="19"
+                        android:minHeight="48dp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Hidden TextView for ViewBinding compatibility -->
+                <TextView
+                    android:id="@+id/text_money"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+
+                <!-- Conta Bancária -->
+                <TextView
+                    android:id="@+id/text_bank_account"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="@string/text_bank_account"
+                    android:textColor="#546E7A"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_bank_account"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:hintEnabled="false"
+                    app:startIconDrawable="@drawable/ic_wallet">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actv_bank_account"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:completionThreshold="1"
+                        android:hint="@string/text_bank_account"
+                        android:inputType="textCapWords"
+                        android:minHeight="48dp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Card 3: Tipo, Parcelamento e Categoria -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:autofillHints="phone"
-            android:hint="@string/edit_installment_final"
-            android:inputType="number"
-            android:minHeight="48dp" />
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:strokeColor="#E0E0E0"
+            app:strokeWidth="1dp">
 
-        <ImageButton
-            android:id="@+id/button_calculator"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="center_vertical"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/calculator_desc_image_button"
-            android:src="@drawable/ic_calculate"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Tipo de Transação -->
+                <TextView
+                    android:id="@+id/text_transaction_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_transaction_type"
+                    android:textColor="#546E7A"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <RadioGroup
+                    android:id="@+id/group_radio_transaction_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/radio_income"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:minHeight="48dp"
+                        android:text="@string/radio_income" />
+
+                    <RadioButton
+                        android:id="@+id/radio_expense"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:minHeight="48dp"
+                        android:text="@string/radio_expense" />
+
+                </RadioGroup>
+
+                <!-- Parcelamento -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <CheckBox
+                        android:id="@+id/check_installment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:enabled="true"
+                        android:text="@string/check_installment" />
+
+                    <LinearLayout
+                        android:id="@+id/layout_installments"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <EditText
+                            android:id="@+id/edit_installment_current"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:autofillHints="phone"
+                            android:hint="@string/edit_installment_current"
+                            android:inputType="number"
+                            android:minHeight="48dp" />
+
+                        <TextView
+                            android:id="@+id/text_installment_slash"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="4dp"
+                            android:text="@string/text_installment_slash"
+                            android:textSize="18sp" />
+
+                        <EditText
+                            android:id="@+id/edit_installment_final"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:autofillHints="phone"
+                            android:hint="@string/edit_installment_final"
+                            android:inputType="number"
+                            android:minHeight="48dp" />
+
+                        <ImageButton
+                            android:id="@+id/button_calculator"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_gravity="center_vertical"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/calculator_desc_image_button"
+                            android:src="@drawable/ic_calculate"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Categoria 50-30-20 -->
+                <TextView
+                    android:id="@+id/text_category"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/text_category"
+                    android:textColor="#546E7A"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <RadioGroup
+                    android:id="@+id/group_category"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:divider="?android:attr/dividerVertical"
+                    android:orientation="horizontal"
+                    android:showDividers="middle">
+
+                    <RadioButton
+                        android:id="@+id/radio_needs"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:minHeight="48dp"
+                        android:text="@string/need_category_radio"
+                        android:textSize="12sp" />
+
+                    <RadioButton
+                        android:id="@+id/radio_wants"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:minHeight="48dp"
+                        android:text="@string/wants_category_radio"
+                        android:textSize="12sp" />
+
+                    <RadioButton
+                        android:id="@+id/radio_investments"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:minHeight="48dp"
+                        android:text="@string/investments_category_radio"
+                        android:textSize="12sp" />
+
+                </RadioGroup>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Botão Principal -->
+        <Button
+            android:id="@+id/button_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/button_save" />
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/text_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/text_category"
-        android:textColor="#546E7A"
-        app:layout_constraintTop_toBottomOf="@id/check_installment" />
-
-    <RadioGroup
-        android:id="@+id/group_category"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:divider="?android:attr/dividerVertical"
-        android:orientation="horizontal"
-        android:showDividers="middle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_category"
-        app:layout_constraintWidth_max="488dp" >
-
-        <RadioButton
-            android:id="@+id/radio_needs"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:minHeight="48dp"
-            android:text="@string/need_category_radio"
-            android:textSize="11sp" />
-
-        <RadioButton
-            android:id="@+id/radio_wants"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:minHeight="48dp"
-            android:text="@string/wants_category_radio"
-            android:textSize="11sp" />
-
-        <RadioButton
-            android:id="@+id/radio_investments"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:minHeight="48dp"
-            android:text="@string/investments_category_radio"
-            android:textSize="11sp" />
-    </RadioGroup>
-
-    <Button
-        android:id="@+id/button_save"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:minHeight="48dp"
-        android:text="@string/button_save"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/group_category" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
