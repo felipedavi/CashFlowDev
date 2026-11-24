@@ -7,8 +7,11 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 
 class MainApplication: Application() {
 
-    private val database by lazy { TransactionDatabase.getDatabase(this@MainApplication) }
-    val repository by lazy { TransactionRepository(database.transactionDAO()) }
+    val repository by lazy {
+        TransactionRepository {
+            TransactionDatabase.getDatabase(this@MainApplication).transactionDAO()
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()

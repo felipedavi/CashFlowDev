@@ -8,7 +8,10 @@ import meimaonamassa.cashflow.data.export.CsvImportResult
 import meimaonamassa.cashflow.data.local.TransactionDAO
 import java.io.InputStream
 
-class TransactionRepository(private val dao: TransactionDAO) {
+class TransactionRepository(private val daoProvider: () -> TransactionDAO) {
+    constructor(dao: TransactionDAO) : this({ dao })
+
+    private val dao: TransactionDAO get() = daoProvider()
     @WorkerThread
     suspend fun insert(transaction: TransactionEntity) {
         dao.insert(transaction)
