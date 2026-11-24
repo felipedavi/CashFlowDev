@@ -384,7 +384,7 @@ class TransactionAddFragment : Fragment() {
                     )
                 )
             }
-            findNavController().navigateUp()
+            navigateBackAfterSave()
         } else {
             val transaction = TransactionEntity(
                 id = 0,
@@ -406,7 +406,15 @@ class TransactionAddFragment : Fragment() {
 
     private fun saveAndExit(transaction: TransactionEntity) {
         viewModel.insert(transaction)
-        findNavController().navigateUp()
+        navigateBackAfterSave()
+    }
+
+    private fun navigateBackAfterSave() {
+        if (args.cloneTransactionId > 0) {
+            findNavController().popBackStack(R.id.transactionFragment, false)
+        } else {
+            findNavController().navigateUp()
+        }
     }
     // endregion
 }
