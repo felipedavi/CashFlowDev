@@ -148,11 +148,31 @@ class TransactionFragment : Fragment() {
                 }
 
                 launch {
-                    viewModel.availableBankAccounts.collect { accounts ->
+                    kotlinx.coroutines.flow.combine(
+                        viewModel.availableBankAccounts,
+                        viewModel.selectedBankAccounts
+                    ) { accounts, selectedAccounts ->
+                        Pair(accounts, selectedAccounts)
+                    }.collect { (accounts, selectedAccounts) ->
                         populateBankAccountChips(
                             accounts = accounts,
-                            selectedAccounts = viewModel.selectedBankAccounts.value
+                            selectedAccounts = selectedAccounts
                         )
+                    }
+                }
+
+                launch {
+                    viewModel.filterDefaultIssueDateOnly.collect { defaultIssueDateOnly ->
+                        val filterView = binding.root.findViewById<View>(R.id.filter_menu_container)
+                        val chipDefaultIssueDate =
+                            filterView?.findViewById<Chip>(R.id.chipFilterDefaultIssueDate)
+                        if (chipDefaultIssueDate != null && chipDefaultIssueDate.isChecked != defaultIssueDateOnly) {
+                            chipDefaultIssueDate.setOnCheckedChangeListener(null)
+                            chipDefaultIssueDate.isChecked = defaultIssueDateOnly
+                            chipDefaultIssueDate.setOnCheckedChangeListener { _, isChecked ->
+                                viewModel.toggleDefaultIssueDateFilter(isChecked)
+                            }
+                        }
                     }
                 }
 
