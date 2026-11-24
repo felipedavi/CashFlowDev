@@ -125,6 +125,12 @@
     <!-- Settings Actions -->
     <string name="button_import">Importar</string>
     <string name="button_export">Exportar</string>
+    <string name="button_export_csv">Exportar CSV</string>
+    <string name="button_import_csv">Importar CSV</string>
+    <string name="button_export_db">Backup Banco (.db)</string>
+    <string name="settings_export_db_desc">Salvar cópia completa do banco de dados SQLite</string>
+    <string name="button_import_db">Restaurar Banco (.db)</string>
+    <string name="settings_import_db_desc">Restaurar arquivo completo do banco SQLite</string>
     <string name="button_delete">Apagar Tudo</string>
     <string name="button_about">Sobre</string>
 
@@ -138,6 +144,10 @@
     <!-- Import and Export -->
     <string name="alert_export_data_success">Backup exportado com sucesso</string>
     <string name="alert_import_data_success">Dados importados com sucesso!</string>
+    <string name="alert_export_db_success">Backup (.db) exportado com sucesso!</string>
+    <string name="alert_import_db_success">Banco de dados (.db) restaurado com sucesso!</string>
     <string name="error_import_failed">Falha na importação: O arquivo é inválido ou está vazio.</string>
+    <string name="error_export_db_failed">Falha ao exportar backup do banco de dados.</string>
+    <string name="error_import_db_failed">Falha ao restaurar banco de dados: Arquivo inválido ou corrompido.</string>
 
 </resources>
