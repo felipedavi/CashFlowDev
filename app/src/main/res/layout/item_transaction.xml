@@ -1,73 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginBottom="8dp">
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
 
-    <TextView
-        android:id="@+id/textItemTransaction"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="My transaction description" />
+        android:padding="12dp">
 
-    <TextView
-        android:id="@+id/textItemPayerPayeeTransaction"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textColor="#757575"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="@id/textItemTransaction"
-        app:layout_constraintStart_toStartOf="@id/textItemTransaction"
-        app:layout_constraintTop_toBottomOf="@id/textItemTransaction"
-        tools:text="Payer / Payee" />
+        <View
+            android:id="@+id/item_view"
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:background="?android:colorAccent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/text_bank_account"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textColor="#78909C"
-        android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="@id/textItemPayerPayeeTransaction"
-        app:layout_constraintTop_toBottomOf="@id/textItemPayerPayeeTransaction"
-        tools:text="Nubank" />
+        <TextView
+            android:id="@+id/textItemTransaction"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#1E293B"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/text_ItemTransactionMonetaryValue"
+            app:layout_constraintStart_toEndOf="@id/item_view"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Compra Supermercado" />
 
-    <TextView
-        android:id="@+id/text_ItemTransactionMonetaryValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        app:layout_constraintStart_toStartOf="@id/text_bank_account"
-        app:layout_constraintTop_toBottomOf="@id/text_bank_account"
-        tools:text="R$ 130.000,00" />
+        <TextView
+            android:id="@+id/textItemPayerPayeeTransaction"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#64748B"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@id/text_ItemTransactionDate"
+            app:layout_constraintStart_toStartOf="@id/textItemTransaction"
+            app:layout_constraintTop_toBottomOf="@id/textItemTransaction"
+            tools:text="Carrefour / João Silva" />
 
-    <TextView
-        android:id="@+id/text_ItemTransactionDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_bank_account"
-        tools:text="25/12/2020" />
+        <TextView
+            android:id="@+id/text_bank_account"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#475569"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/text_ItemTransactionDate"
+            app:layout_constraintStart_toStartOf="@id/textItemTransaction"
+            app:layout_constraintTop_toBottomOf="@id/textItemPayerPayeeTransaction"
+            tools:text="Nubank" />
 
-    <View
-        android:id="@+id/item_view"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="8dp"
-        android:background="?android:colorAccent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_ItemTransactionDate" />
+        <TextView
+            android:id="@+id/text_ItemTransactionMonetaryValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#0F172A"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/textItemTransaction"
+            tools:text="R$ 130,00" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/text_ItemTransactionDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="#94A3B8"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_ItemTransactionMonetaryValue"
+            tools:text="25/12/2020" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>
