@@ -66,18 +66,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/edit_description" />
 
-    <EditText
-        android:id="@+id/edit_issue_date"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_issue_date"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:importantForAutofill="no"
-        android:inputType="date"
-        android:maxLength="10"
-        android:minHeight="48dp"
-        app:layout_constraintEnd_toStartOf="@id/edit_payment_date"
+        android:layout_marginEnd="4dp"
+        app:endIconContentDescription="Abrir calendário"
+        app:endIconDrawable="@drawable/ic_calendar"
+        app:endIconMode="custom"
+        app:hintEnabled="false"
+        app:layout_constraintEnd_toStartOf="@id/til_payment_date"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_issue_date" />
+        app:layout_constraintTop_toBottomOf="@id/text_issue_date">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_issue_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            android:maxLength="10"
+            android:minHeight="48dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:id="@+id/text_payment_date"
@@ -91,18 +103,30 @@
         app:layout_constraintStart_toEndOf="@id/text_issue_date"
         app:layout_constraintTop_toBottomOf="@id/edit_description" />
 
-    <EditText
-        android:id="@+id/edit_payment_date"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_payment_date"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:importantForAutofill="no"
-        android:inputType="date"
-        android:maxLength="10"
-        android:minHeight="48dp"
+        android:layout_marginStart="4dp"
+        app:endIconContentDescription="Abrir calendário"
+        app:endIconDrawable="@drawable/ic_calendar"
+        app:endIconMode="custom"
+        app:hintEnabled="false"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/edit_issue_date"
-        app:layout_constraintTop_toBottomOf="@id/text_payment_date" />
+        app:layout_constraintStart_toEndOf="@id/til_issue_date"
+        app:layout_constraintTop_toBottomOf="@id/text_payment_date">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_payment_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            android:maxLength="10"
+            android:minHeight="48dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:id="@+id/text_money"
@@ -113,7 +137,7 @@
         android:textColor="#546E7A"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/edit_payment_date" />
+        app:layout_constraintTop_toBottomOf="@id/til_payment_date" />
 
     <EditText
         android:id="@+id/edit_money"
