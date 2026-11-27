@@ -87,16 +87,9 @@ class TransactionAddFragment : Fragment() {
         binding.editPayerPayee.setText(transaction.payerPayee)
         binding.editDescription.setText(transaction.description)
 
-        val issueDateStr = DateConverters.fromOffsetDateTime(transaction.issueDate)?.fromFormattedDate()
-        if (!issueDateStr.isNullOrEmpty()) {
-            binding.editIssueDate.setText(issueDateStr)
-        }
-
-        if (transaction.paymentDate != null) {
-            binding.editPaymentDate.setText(
-                DateConverters.fromOffsetDateTime(transaction.paymentDate)?.fromFormattedDate()
-            )
-        }
+        val currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        binding.editIssueDate.setText(currentDate)
+        binding.editPaymentDate.setText("")
 
         binding.editMoney.setText(transaction.monetaryValue.toCurrency())
         binding.actvBankAccount.setText(transaction.bankAccount, false)
