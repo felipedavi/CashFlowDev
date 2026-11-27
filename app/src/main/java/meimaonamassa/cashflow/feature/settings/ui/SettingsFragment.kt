@@ -24,6 +24,7 @@ import meimaonamassa.cashflow.feature.settings.SettingsViewModelFactory
 import meimaonamassa.cashflow.util.CurrencyTextWatcher
 import meimaonamassa.cashflow.util.extension.fromCurrency
 import meimaonamassa.cashflow.util.extension.hideKeyboard
+import meimaonamassa.cashflow.util.extension.isValid
 import meimaonamassa.cashflow.util.extension.toCurrency
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -154,6 +155,7 @@ class SettingsFragment : Fragment() {
         binding.editMonthlyBudget.addTextChangedListener(CurrencyTextWatcher(binding.editMonthlyBudget))
 
         binding.buttonSaveBudget.setOnClickListener {
+            if (!binding.editMonthlyBudget.isValid()) return@setOnClickListener
             val budgetString = binding.editMonthlyBudget.text.toString()
             val budgetValue = budgetString.fromCurrency().toFloat()
             sharedPref.edit {
